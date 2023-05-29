@@ -13,7 +13,8 @@ def tabulate():
     cols = ['London', 'New York', 'Tokyo']
     lats = [51.51, 40.74, 35.67]
     lons = [-0.11, -73.98, 139.74]
-    gmts = [[0,1,1,0], [-5, -4, -4, -5], [9,9,9,9]]
+    # Assume London uses GMT+0 and New York uses GMT-4 at March 21, which is usually the case
+    gmts = [[0,1,1,0], [-4, -4, -4, -5], [9,9,9,9]]
     dates = [Date(3,21), Date(6,22), Date(9,23), Date(12,22)]
     indexes = ["0321", "0622", "0923", "1222"]
     for j in range(4):
