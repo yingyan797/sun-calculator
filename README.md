@@ -8,6 +8,7 @@ To try this program, run test.py to see two examples or use the tabulate() funct
 Also, you can use calcSun() function in test.py to create your own example. Provide latitude, longitude, time zone (GMT+n), and date, in this order, to view results. Sunrise and sunset are local times in the given time zone.
 
 For example: calcSun(43.65, -79.35, -4, Date(7,1))
+
 Note: 
 1) Latitude (-90 to 90) and lontitude (-180 to 180) units are degree, with positive suggesting north/east and negative south/west
 2) GMT input range is from -12 to 12 inclusive
