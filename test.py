@@ -4,7 +4,7 @@ from dateTime import Date
 
 def tests():
     print("\n"+"--Vladivostok 0622--")
-    calcSun(49.6, -1.8, 2, Date(6,22))
+    calcSun(43.12, 131.9, 9, Date(6,22))
     print("\n"+"--Calais 0701--")
     calcSun(50.96, 1.85, 2, Date(7,1))
 
