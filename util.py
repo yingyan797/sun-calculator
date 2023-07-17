@@ -6,6 +6,25 @@ def toRad(deg):
 def toDeg(rad):
     return rad*180/np.pi
 
+def n2norm(vec):
+    sum = 0
+    for c in vec:
+        sum += pow(c,2)
+    return np.sqrt(sum)
+
+def unit(vec):
+    return vec/n2norm(vec)    
+
+def project(vec, base):
+    legnth = np.dot(vec, base)/n2norm(base)
+    return legnth * unit(base)
+
+def debase(vec, base):
+    return vec-project(vec, base)
+
+def vecAngleCos(v1, v2):
+    return np.dot(v1, v2)/(n2norm(v1) * n2norm(v2))
+
 def dateToDays(date, ref):
     (cmp, spanMonths, dayDiff) = date.diff(ref)
     days = 0

@@ -1,12 +1,16 @@
 import pandas as pd
-from model import sunTimes, calcSun
-from dateTime import Date
+from sunTime import sunTimes, calcSun
+from sunPosition import sunTimePosition
+from dateTime import Date, Time
 
-def tests():
+def timeTests():
     print("\n"+"--Vladivostok 0622--")
     calcSun(43.12, 131.9, 10, Date(6,22))
     print("\n"+"--Calais 0701--")
     calcSun(50.96, 1.85, 2, Date(7,1))
+
+def posTests():
+    print(sunTimePosition(36, 120, 8, Date(12,22), Time(11, 59, 60, 0)))
 
 def tabulate():
     data = []
@@ -27,4 +31,4 @@ def tabulate():
     sunTable = pd.DataFrame(data, indexes, cols)
     print(sunTable)
 
-tests()
+posTests()
