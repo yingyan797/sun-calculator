@@ -15,7 +15,12 @@ def sunGeometric(lat0, lat, lon):
 
     ht = 90-toDeg(np.arccos(vecAngleCos(sun, loc)))
     ort = debase(sun, loc)
-    ang = toDeg(np.arccos(vecAngleCos(ort, north))) 
+    angCos = vecAngleCos(ort, north)
+    if angCos > 1-1/100000:
+        return ht, 0
+    if angCos < -1+1/100000:
+        return ht, 180
+    ang = toDeg(np.arccos(angCos)) 
     if (np.dot(ort, east) < 0):
         ang = 360-ang
     return ht, ang
@@ -23,4 +28,5 @@ def sunGeometric(lat0, lat, lon):
 def sunTimePosition(lat, lon, gmt, date, time):
     noon = noonTime(gmt, lon)
     lat0 = toDeg(np.arcsin(sunDirectLatSin(date)))
-    return sunGeometric(lat0, lat, (time.toSecs() - noon.toSecs())/dsecs*360)
+    ht, ang = sunGeometric(lat0, lat, (time.toSecs() - noon.toSecs())/dsecs*360)
+    return "Sun height: "+str(ht)+"; Sun direction: "+str(ang)
