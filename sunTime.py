@@ -1,5 +1,6 @@
 import numpy as np
-from sunModel import sunDirectLatSin, noonTime, dsecs
+from model import sunDirectLatSin, noonSecs
+from dateTime import dsecs
 from util import toRad, toDeg, secondsToTime
 
 def daytimeBalance(date, lat):
@@ -16,11 +17,9 @@ def dayLength(date, lat):
 
 # Main formula to calculate sunrise&sunset times
 def sunTimes(lat, lon, gmt, date):
-    hdl = secondsToTime(dayLength(date, lat)/2)
-    noon = noonTime(gmt, lon)
-    sunrise = noon.pred(hdl)
-    sunset = noon.succ(hdl)
-    return sunrise, sunset
+    hdl = dayLength(date, lat)/2
+    noon = noonSecs(gmt, lon)
+    return secondsToTime(noon-hdl), secondsToTime(noon+hdl)
 
 # Display calculation result
 def calcSun(lat, lon, gmt, date):

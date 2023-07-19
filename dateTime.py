@@ -1,3 +1,5 @@
+ydays = 365.25  # The number of days per year on average
+dsecs = 86400   # The number of seconds per day
 # mdays: The number of days in each months
 # on average, assume February has 28.25 days
 mdays = [31,28.25,31,30,31,30,31,31,30,31,30,31]
@@ -50,7 +52,7 @@ class Time:
         s = self.second - diff.second
         m = self.minute - diff.minute
         h = self.hour - diff.hour
-        d = 0
+        d = self.day - diff.day
         if s < 0:
             s += 60
             m -= 1
@@ -59,14 +61,14 @@ class Time:
             h -= 1
         if h < 0:
             h += 24
-            d -= 1
+            d -= 1            
         return Time(h,m,s,d)
     # add time by a period (diff :: Time)
     def succ(self, diff):
         s = self.second + diff.second
         m = self.minute + diff.minute
         h = self.hour + diff.hour
-        d = 0
+        d = self.day + diff.day
         if s >= 60:
             s -= 60
             m += 1
@@ -77,8 +79,9 @@ class Time:
             h -= 24
             d += 1
         return Time(h,m,s,d)
+    
     def toSecs(self):
-        return self.hour * 3600 + self.minute * 60 + self.second
+        return self.day*dsecs + self.hour*3600 + self.minute*60 + self.second
     
     def show(self):
         m = str(self.minute)
@@ -91,8 +94,8 @@ class Time:
             s = "0"+s
         if self.hour < 10:
             h = "0"+h
-        if self.day == 1:
-            d = " (next day)"
-        if self.day == -1:
-            d = " (previous day)"
+        if self.day > 0:
+            d = " <"+str(self.day)+" day(s) after>"
+        if self.day < 0:
+            d = " <"+str(-self.day)+" day(s) before>"
         return h+":"+m+":"+s+d

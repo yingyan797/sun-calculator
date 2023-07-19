@@ -1,6 +1,6 @@
 import pandas as pd
 from sunTime import sunTimes, calcSun
-from sunPosition import sunTimePosition
+from sunPosition import sunTimePosition, sunHeightTimeLim, sunDirectionTimeLim
 from dateTime import Date, Time
 
 def timeTests():
@@ -10,7 +10,7 @@ def timeTests():
     calcSun(50.96, 1.85, 2, Date(7,1))
 
 def posTest():
-    print(sunTimePosition(51, 0, 1, Date(9,22), Time(12, 0, 45, 0)))
+    print(sunTimePosition(51, 0, 1, Date(9,22), Time(13, 0, 0, 0)))
 
 def posTime():
     for h in range(12,15):
@@ -27,6 +27,12 @@ def posLocation():
     for lat in range(55):
         print(lat,"N,",0," -- ",sunTimePosition(lat, 0, 1, Date(6,22), Time(15,0,0,0)))
         
+def timeHeightLimitTest():
+    t1, t2 = sunHeightTimeLim(0, 0, 0, Date(3,21), 12)
+    print(t1.show(), t2.show())
+
+def timeDirectionLimitTest():
+    print(sunDirectionTimeLim(0,0,0, Date(7,19), 300).show())
 
 def tabulate():
     data = []
@@ -47,4 +53,4 @@ def tabulate():
     sunTable = pd.DataFrame(data, indexes, cols)
     print(sunTable)
 
-posLocation()
+timeDirectionLimitTest()
