@@ -1,5 +1,4 @@
-import pandas as pd
-from sunTime import sunTimes, calcSun
+from sunTime import sunTimes, calcSun, sunTimeAltitude
 from sunPosition import sunTimePosition, sunHeightTimeLim, sunDirectionTimeLim
 from dateTime import Date, Time
 
@@ -8,9 +7,11 @@ def timeTests():
     calcSun(43.12, 131.9, 10, Date(6,22))
     print("\n"+"--Calais 0701--")
     calcSun(50.96, 1.85, 2, Date(7,1))
+    print("\n"+"--Wutaishan 0721--")
+    calcSun(39.2, 112, 8, Date(7,24))
 
 def posTest():
-    print(sunTimePosition(51, 0, 1, Date(9,22), Time(13, 0, 0, 0)))
+    print(sunTimePosition(31.23, 121.48, 8, Date(8,24), Time(10, 0, 0, 0)))
 
 def posTime():
     for h in range(12,15):
@@ -28,11 +29,15 @@ def posLocation():
         print(lat,"N,",0," -- ",sunTimePosition(lat, 0, 1, Date(6,22), Time(15,0,0,0)))
         
 def timeHeightLimitTest():
-    t1, t2 = sunHeightTimeLim(0, 0, 0, Date(3,21), 12)
+    t1, t2 = sunHeightTimeLim(39.5, 113.5, 8, Date(7,21), 30)
     print(t1.show(), t2.show())
 
 def timeDirectionLimitTest():
-    print(sunDirectionTimeLim(0,0,0, Date(7,19), 300).show())
+    print(sunDirectionTimeLim(39.5,113.5,8, Date(7,21), 45).show(), sunDirectionTimeLim(39.5,113.5,8, Date(7,21), 180).show())
+
+def altitudeSuntimeTest():
+    t1,t2 = sunTimeAltitude(51,0,1,Date(6,22), 100000)
+    print(t1.show(), t2.show())
 
 def tabulate():
     data = []
@@ -53,4 +58,4 @@ def tabulate():
     sunTable = pd.DataFrame(data, indexes, cols)
     print(sunTable)
 
-timeDirectionLimitTest()
+posTest()

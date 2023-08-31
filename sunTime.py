@@ -1,7 +1,8 @@
 import numpy as np
-from model import sunDirectLatSin, noonSecs
+from model import sunDirectLatSin, noonSecs, horizonAngle
 from dateTime import dsecs
 from util import toRad, toDeg, secondsToTime
+from sunPosition import sunHeightTimeLim
 
 def daytimeBalance(date, lat):
     pss = sunDirectLatSin(date)
@@ -38,3 +39,8 @@ def calcSun(lat, lon, gmt, date):
           +"Date: "+date.show()+"\n"
           +"Sunrise: "+sr.show()+"\n"
           +"Sunset:  "+ss.show())
+
+def sunTimeAltitude(lat, lon, gmt, date, alt):
+    return sunHeightTimeLim(lat, lon, gmt, date, horizonAngle(alt))
+
+
