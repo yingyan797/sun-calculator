@@ -58,4 +58,4 @@ def tabulate():
     sunTable = pd.DataFrame(data, indexes, cols)
     print(sunTable)
 
-posTest()
+timeHeightLimitTest()
