@@ -1,5 +1,5 @@
 import numpy as np
-from dateTime import Time, mdays, dsecs
+from dateTime import Time, Date, mdays, dsecs
 
 def arcCap(ac):
     if ac > 1:
@@ -30,17 +30,19 @@ def debase(vec, base):
     return vec-project(vec, base)
 
 def vecAngleCos(v1, v2):
-    return arcCap(np.dot(v1, v2)/(n2norm(v1) * n2norm(v2))) 
+    return arcCap(np.dot(v1, v2)/(n2norm(v1) * n2norm(v2)))     
 
-def dateToDays(date, ref):
-    (cmp, spanMonths, dayDiff) = date.diff(ref)
-    days = 0
-    for m in spanMonths:
-        days += mdays[m-1]
-    days += dayDiff
-    if cmp < 0:
-        return (-1)*days
-    return days
+def daysToDate(days):
+    month = 1
+    day = 0
+    for md in mdays:
+        if days > md:
+            month += 1
+            days -= md
+        else:
+            day = np.ceil(days)
+            break
+    return Date(month, int(day))
 
 def secondsToTime(secs):
     d = 0

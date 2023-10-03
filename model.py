@@ -1,5 +1,5 @@
 import numpy as np
-from util import toDeg, toRad, dateToDays, arcCap
+from util import toDeg, toRad, arcCap
 from dateTime import Date, Time, ydays, dsecs
 
 axisAngle = toRad(23.5)
@@ -7,7 +7,11 @@ springEquinox = Date(3, 21)
 earthRadius = 6371000 # In meters 
 
 def sunDirectLatSin(date):
-    days = dateToDays(date, springEquinox)
+    days = 0
+    if isinstance(date, Date):
+        days = date.daysToRef(springEquinox)
+    else:
+        days = date-springEquinox.daysToRef(Date(1,1))
     phase = 2*np.pi*days/ydays
     return arcCap(np.sin(phase) * np.sin(axisAngle))
 
@@ -22,3 +26,4 @@ def horizonAngle(alt):
 
 def horizonDistance(alt):
     return earthRadius/1000 * horizonArc(alt)
+

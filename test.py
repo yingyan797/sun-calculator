@@ -39,6 +39,9 @@ def altitudeSuntimeTest():
     t1,t2 = sunTimeAltitude(51,0,1,Date(6,22), 100000)
     print(t1.show(), t2.show())
 
+def dateHeightLimitTest():
+    print()
+
 def tabulate():
     data = []
     cols = ['London', 'New York', 'Tokyo']

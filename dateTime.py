@@ -37,6 +37,16 @@ class Date:
             m1 += 1
         return (cmp, spanMonths, dayDiff)
     
+    def daysToRef(self, ref):
+        (cmp, spanMonths, dayDiff) = self.diff(ref)
+        days = 0
+        for m in spanMonths:
+            days += mdays[m-1]
+        days += dayDiff
+        if cmp < 0:
+            return (-1)*days
+        return days
+    
     def show(self):
         return months[self.month-1]+" "+str(self.day)
 
@@ -99,3 +109,4 @@ class Time:
         if self.day < 0:
             d = " <"+str(-self.day)+" day(s) before>"
         return h+":"+m+":"+s+d
+    
