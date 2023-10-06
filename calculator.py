@@ -17,6 +17,7 @@ months = {
     "august": "8",
     "aug": "8",
     "september": "9",
+    "sept": "9",
     "sep": "9",
     "october": "10",
     "oct": "10",
@@ -25,6 +26,26 @@ months = {
     "december": "12",
     "dec": "12"
 }
+
+class Abstract:
+    def __init__(self):
+        self.queries = []     
+        self.angles = []
+        self.date, self.time, self.lat, self.lon, self.gmt = None, None, None, None, None
+    
+    def show(self):
+        print("=====")
+        print("User asking for:", self.queries)
+        print("Angles provided:", self.angles)
+        print("Given condition:\n", "Lat", self.lat, "Lon", self.lon, "GMT", self.gmt)
+        if self.date:
+            print(" Date:",self.date.show())
+        else:
+            print("no date")
+        if self.time:
+            print(" Time",self.time.show())
+        else:
+            print("no time")
 
 class Calculator:
     def __init__(self, seps):
@@ -47,20 +68,38 @@ class Calculator:
                 print("Sorry, I cannot understand your question. Could you describe differently or directly fill a form?")
     
     def parseTask(self):
+        ab = Abstract()
         while self.readProgress < len(self.taskDesc):
             date = self.parseDate()
             if date:
-                print("Date:",date.show())
+                ab.date = date
                 continue
             time = self.parseTime()
             if time:
-                print("Time:",time.show())
+                ab.time= time
                 continue
-            loc = self.parseLocation()
-            if loc:
-                print("Lat:",loc[0], "Lon:",loc[1])
+            lat, lon = self.parseLocation()
+            if lon:
+                ab.lat = lat
+                ab.lon = lon
+                continue
+            gmt = self.parseGMT()
+            if gmt:
+                ab.gmt = gmt
+                continue
             
+            angle = self.parseAngle()
+            if angle:
+                ab.angles.append(angle)
+                continue
+
+            query = self.parseQuery()
+            if query:
+                ab.queries.append(query)
+
+            print(self.notMatchToken,"-")
             self.notMatchToken = ""
+        ab.show()
 
         
     def parseDate(self):
@@ -228,7 +267,7 @@ class Calculator:
             prg = self.readProgress
             if loc != "" and d == '':
                 t = self.readToken()
-                if t in ["degree", "deg", "deg.", "d."]:
+                if t in ["degree", "deg", "deg.", "d.", "d"]:
                     t = self.readToken()
                 if t in ["north", "n"]:
                     d = 'n'
@@ -250,29 +289,104 @@ class Calculator:
                     loc = '-' + loc
             return (loc, d)                                    
         
-        prg = self.readProgress
-        t0 = t
+        
         loc1 = toCoord(t)
         if loc1 != ("", ''):
             if loc1[1] == '' and self.precSymbol() == '-':
                 loc1 = '-'+loc1[0], 'n'
 
+            prg = self.readProgress
+            t0 = t
+            print("t0", t0)
             t = self.readToken()
             loc2 = toCoord(t)
+
             if loc2 != ("", ''):
                 if loc2[1] == '' and self.precSymbol() == '-':
                     loc2 = '-'+loc2[0], 'e'
-            else:
+            elif loc1[1] != '':
                 self.readProgress = prg
+                self.notMatchToken = t0
+                return (None, float(loc1[0]))
+            else:
                 t = t0
+                self.readProgress = prg
+                print("rem", self.taskDesc[self.readProgress:])
 
-        if loc1 == ("", '') or loc2 == ("", ''):
+        if loc2 == ("", ''):
             self.notMatchToken = t
-            return None
+            return (None, None)
         
+        self.notMatchToken = ""
         if loc1[1] == 'e':
             return (float(loc2[0]), float(loc1[0]))
         return (float(loc1[0]), float(loc2[0]))
+
+    def parseGMT(self):
+        t = self.notMatchToken
+        if t == "":
+            t = self.readToken()
+        
+        gmt = 0
+        if t in ["gmt", "utc"]:
+            sym = self.precSymbol()
+            t = self.readToken()
+            if t.isnumeric():
+                gmt = int(t)
+                if sym == '-':
+                    gmt = -gmt
+                self.notMatchToken = ""
+                return gmt
+            
+        self.notMatchToken = t
+        return None
+    
+    def parseQuery(self):
+        t = self.notMatchToken
+        if t == "":
+            t = self.readToken()
+
+        if t in ["sunrise", "sunset", "date", "day", "time", "height", "high", "direction", "orientation", "longitude", "lon", "latitude", "lat"]:
+            self.notMatchToken = ""
+            return t
+        
+        if t in ["above", "below"]:
+            query = t
+            t = self.readToken()
+            if t in ["horizon", "ground"]:
+                self.notMatchToken = ""
+                return query
+            
+        self.notMatchToken = t
+        return None
+            
+    def parseAngle(self):
+        t = self.notMatchToken
+        if t == "":
+            t = self.readToken()
+
+        ang = ""
+        deci = False
+        for c in t:
+            if not deci and c == '.':
+                ang += '.'
+                deci = True
+            elif c.isdigit():
+                ang += c
+            else:
+                break
+
+        t0 = t
+        prg = self.readProgress
+        t = self.readToken()
+        if t in ["degree", "deg", "deg.", "d", "d."]:
+            self.notMatchToken = ""
+            return float(ang)
+        t = t0
+        self.readProgress = prg
+
+        self.notMatchToken = t
+        return None
 
     def readToken(self):
         haveToken = False
@@ -297,11 +411,12 @@ class Calculator:
        
 
 c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
-c.taskDesc = "what time of dhabi on june 25, 27 of july is the 12:31_15 am sun at 103 deg. West, 37 d. North height 75 degree?"
+c.taskDesc = "what time of dhabi 24_N 95_E gmt 4 on june 25 is the sun 75 degree above horizon and direction at 315 deg?"
 c.parseTask()
 
 
 '''
+what is the sunrise hour at chicago gmt-5 51N 0w on july 4th?
 calculate the sunset hour of london on june 25
 what time of dhabi on june 25 is the sun height 75 degree?
 what date is dubai 17:25 sun direction 285?
