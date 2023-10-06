@@ -1,43 +1,91 @@
 from dateTime import Date, Time
 
 months = {
-    "january": "1",
-    "jan": "1",
-    "february": "2",
-    "feb": "2",
-    "march": "3",
-    "mar": "3",
-    "april": "4",
-    "apr": "4",
-    "may": "5",
-    "june": "6",
-    "jun": "6",
-    "july": "7",
-    "jul": "7",
-    "august": "8",
-    "aug": "8",
-    "september": "9",
-    "sept": "9",
-    "sep": "9",
-    "october": "10",
-    "oct": "10",
-    "november": "11",
-    "nov": "11",
-    "december": "12",
-    "dec": "12"
+    "january": "1","jan": "1","february": "2","feb": "2","march": "3","mar": "3","april": "4","apr": "4","may": "5",
+    "june": "6","jun": "6","july": "7","jul": "7","august": "8","aug": "8","september": "9","sept": "9","sep": "9",
+    "october": "10","oct": "10","november": "11","nov": "11","december": "12","dec": "12"
+}
+
+querySet = {
+    "height": 1, "high": 1, "direction": 2, "orientation": 2, "time": 3, "date": 4, "day": 4,
+    "longitude": 5, "lon": 5, "latitude": 6, "lat": 6, "sunrise": 7, "sunset": 8, "above": 1, "below": 0
 }
 
 class Abstract:
     def __init__(self):
-        self.queries = []     
+        self.queries = []
         self.angles = []
-        self.date, self.time, self.lat, self.lon, self.gmt = None, None, None, None, None
+        self.date, self.time, self.lat, self.lon, self.gmt, self.height, self.direction = None, None, None, None, None, None, None
+
+    def queryReduce(self):
+        qi = 0
+        while qi < len(self.queries):
+            q = self.queries[qi]
+            if q <= 1:
+                if len(self.angles) > 0:
+                    self.queries.pop(qi)
+                    self.height = self.angles.pop(0)
+                    if q == 0:
+                        self.height *= -1
+            elif q == 2:
+                if len(self.angles) > 0:
+                    self.queries.pop(qi)
+                    self.direction = self.angles.pop(0)
+            elif q == 5 and self.lat == None:
+                self.queries.pop(qi)
+            elif q == 4 and self.date:
+                self.queries.pop(qi)
+            elif q == 3 and self.time:
+                self.queries.pop(qi)
+            else:
+                qi += 1
+
+    def formQuestion(self):
+        qs = ["What is the height angle of the sun (below horizon)?", "What is the height angle of the sun (above horizon)?", 
+              "What is the direction of the sun (angle clockwise from North)?", "What time of the day is it when", 
+              "Which date is it when", "What is the longitude of a location where", "What is the latitude of a location where", 
+              "When does sunrise occur?", "When does sunset occur?"]
+        question = qs[self.queries[0]]
+        for qi in self.queries[1:]:
+            question += "\nand\n"+qs[qi]
+
+        if self.height:
+            question += " the sun is at "+str(self.height)+" degree above horizon?"
+        if self.direction:
+            question += " the sun's direction is "+str(self.direction)+" degree clockwise from North?"
+        
+        question += " Given that:\n"
+        if self.lat:
+            question += "  At location "
+            if self.lat > 0:
+                question += str(self.lat)+"N,"
+            if self.lat < 0:
+                question += str(-self.lat)+"S,"
+        if self.lon:
+            if self.lon > 0:
+                question += " "+str(self.lon)+"E\n"
+            if self.lon < 0:
+                question += " "+str(-self.lon)+"W\n"
+        if self.gmt:
+            question += "  Time zone is GMT"
+            if self.gmt > 0:
+                question += '+'+str(self.gmt)+'\n'
+            else:
+                question += str(self.gmt)+'\n'
+        if self.date:
+            question += "  On the date "+self.date.show()
+        if self.time:
+            question += "  At the time of "+self.time.show()
+        
+        return question+'?'
+
+            
     
     def show(self):
         print("=====")
         print("User asking for:", self.queries)
         print("Angles provided:", self.angles)
-        print("Given condition:\n", "Lat", self.lat, "Lon", self.lon, "GMT", self.gmt)
+        print("Given condition:\n", "Lat", self.lat, "Lon", self.lon, "GMT", self.gmt, "Hgt:", self.height, "Drn:", self.direction)
         if self.date:
             print(" Date:",self.date.show())
         else:
@@ -95,11 +143,15 @@ class Calculator:
 
             query = self.parseQuery()
             if query:
-                ab.queries.append(query)
+                i = querySet[query]
+                if i not in ab.queries:
+                    ab.queries.append(i)
 
             print(self.notMatchToken,"-")
             self.notMatchToken = ""
-        ab.show()
+        ab.queryReduce()
+        # ab.show()
+        print(ab.formQuestion())
 
         
     def parseDate(self):
@@ -121,7 +173,7 @@ class Calculator:
         fromMonth = ""
         fromDay = ""
         
-        if t in months.keys():
+        if t in months:
             # July 4th
             fromMonth = months[t]
             t = self.readToken()
@@ -158,10 +210,10 @@ class Calculator:
                 t = self.readToken()
                 if t == "of":
                     t = self.readToken()
-                    if t in months.keys():
+                    if t in months:
                         fromMonth = months[t]
                     
-                elif t in months.keys():
+                elif t in months:
                     fromMonth = months[t]
                 else:
                     t = t0
@@ -311,7 +363,6 @@ class Calculator:
             else:
                 t = t0
                 self.readProgress = prg
-                print("rem", self.taskDesc[self.readProgress:])
 
         if loc2 == ("", ''):
             self.notMatchToken = t
@@ -345,10 +396,6 @@ class Calculator:
         t = self.notMatchToken
         if t == "":
             t = self.readToken()
-
-        if t in ["sunrise", "sunset", "date", "day", "time", "height", "high", "direction", "orientation", "longitude", "lon", "latitude", "lat"]:
-            self.notMatchToken = ""
-            return t
         
         if t in ["above", "below"]:
             query = t
@@ -356,6 +403,10 @@ class Calculator:
             if t in ["horizon", "ground"]:
                 self.notMatchToken = ""
                 return query
+        
+        elif t in querySet:
+            self.notMatchToken = ""
+            return t
             
         self.notMatchToken = t
         return None
@@ -411,7 +462,7 @@ class Calculator:
        
 
 c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
-c.taskDesc = "what time of dhabi 24_N 95_E gmt 4 on june 25 is the sun 75 degree above horizon and direction at 315 deg?"
+c.taskDesc = "calculate the sunset hour of london 51N 0.1E gmt+1 on june 25"
 c.parseTask()
 
 
@@ -419,7 +470,8 @@ c.parseTask()
 what is the sunrise hour at chicago gmt-5 51N 0w on july 4th?
 calculate the sunset hour of london on june 25
 what time of dhabi on june 25 is the sun height 75 degree?
-what date is dubai 17:25 sun direction 285?
+what time of dhabi 24_N 95_E gmt 4 on june 25 is the sun 75 degree above horizon and direction at 315 deg?
+what date is dubai 24_N 95_E at the time of 17:25 when sun direction is 285 deg?
 '''
 
 
