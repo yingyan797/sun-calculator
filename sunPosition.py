@@ -1,5 +1,5 @@
 import numpy as np
-from util import toDeg, toRad, vecAngleCos, debase, secondsToTime, daysToDate
+from util import Util
 from model import sunDirectLatSin, noonSecs
 from dateTime import Time,Date, dsecs
 
@@ -18,13 +18,13 @@ def sunVectorSet(lat, noonShift):
     north = np.array([-vs[2]*vs[1], -vs[2]*vs[3], vs[0]])
     return loc, east, north
 
-def sunHeight(lat0, lat, noonShift):
+def sunHeight(sinlat0, lat, noonShift):
     
-    sun = np.array([0, np.cos(lat0), np.sin(lat0)])
+    sun = np.array([0, np.cos(lat0), sinlat0])
     loc = sunVectorSet(lat, noonShift)[0]
     return np.pi/2-np.arccos(vecAngleCos(sun, loc)),0
     
-def sunGeometric(lat0, lat, noonShift):
+def sunGeometric(sinlat0, lat, noonShift):
     loc, east, north = sunVectorSet(lat, noonShift)
     sun = np.array([0, np.cos(lat0), np.sin(lat0)])
     ht = np.pi/2-np.arccos(vecAngleCos(sun, loc))
@@ -40,7 +40,7 @@ def sunTimePosition(lat, lon, gmt, date, time):
     ang, ht = sunGeometric(lat0, lat, [noon, time.toSecs()])
     return "Sun height: "+str(toDeg(ht))+"; Sun direction: "+str(toDeg(ang))
 
-def approachTime(lat0, lat, noon, calc, low, high, std):
+def approachTime(sinlat0, lat, noon, calc, low, high, std):
     tl = low
     th = high
     t = tl
@@ -88,10 +88,13 @@ def approachDate(lat, noon, summer, time, calc, std):
     return minDays
 
 
-def approachLoc(lat0, latOrLon, ang, std):
-    if latOrLon:
-        # approach latitude
-        pass
+def approachLat(lat0, noon, time, calc, std):
+    latl = -np.pi/2
+    lath = np.pi/2
+    lat = latl
+    preDiff = calc(np.arcsin(lat0), )
+    while lat <= lath:
+
     return lon, lat
 
 def sunHeightTimeLim(lat, lon, gmt, date, ht):
