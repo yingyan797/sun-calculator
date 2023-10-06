@@ -37,14 +37,14 @@ class Calculator:
         print("Hello earth scientist, I'm sun calculator.")
 
         while True:
-            self.taskDesc = input("**Please describe what you want to calculate, or press Enter to skip and fill a form.\n--")
+            self.taskDesc = input("**Please describe what you want to calculate, or press -Enter- to skip and fill a form.\n--")
             if self.taskDesc == "":
 
                 return
             elif self.parseTask():
                 return
             else:
-                print("Sorry, I cannot understand your request. Could you describe differently?")
+                print("Sorry, I cannot understand your question. Could you describe differently or directly fill a form?")
     
     def parseTask(self):
         while self.readProgress < len(self.taskDesc):
@@ -200,9 +200,10 @@ class Calculator:
 
         loc1 = ("", '')
         loc2 = ("", '')
-
+        
         def toCoord(tok):
             loc = ""
+            d = ''
             deci = False
 
             if tok[0] == '.':
@@ -216,19 +217,38 @@ class Calculator:
                         loc += '.'
                         deci = True
                     else:
-                        return (loc, '')
+                        break
 
                 if c.isdigit():
                     loc += c
-                if loc != "":
-                    if c in 'ne':
-                        return (loc, c)
-                    if c == 's':
-                        return ('-'+loc, 'n')
-                    if c == 'w':
-                        return ('-'+loc, 'e')
-                
-            return (loc, '')
+                if loc != "" and c in 'news':
+                    d = c
+                    break
+
+            prg = self.readProgress
+            if loc != "" and d == '':
+                t = self.readToken()
+                if t in ["degree", "deg", "deg.", "d."]:
+                    t = self.readToken()
+                if t in ["north", "n"]:
+                    d = 'n'
+                elif t in ["south", "s"]:
+                    d = 's'
+                elif t in ["east", "e"]:
+                    d = 'e'
+                elif t in ["west", "w"]:
+                    d = 'w'
+                else:
+                    self.readProgress = prg
+
+            if loc != "" and d != '':
+                if d == 's':
+                    d = 'n'
+                    loc = '-' + loc
+                elif d == 'w':
+                    d = 'e'  
+                    loc = '-' + loc
+            return (loc, d)                                    
         
         prg = self.readProgress
         t0 = t
@@ -277,7 +297,7 @@ class Calculator:
        
 
 c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
-c.taskDesc = "what time of dhabi on june 25, 27 of july is the 12:31_15 am sun at 103E, 37N height 75 degree?"
+c.taskDesc = "what time of dhabi on june 25, 27 of july is the 12:31_15 am sun at 103 deg. West, 37 d. North height 75 degree?"
 c.parseTask()
 
 
