@@ -62,3 +62,29 @@ class Util:
         m = int(secs/60)
         secs -= 60*m
         return Time(h, m ,secs, d)
+    
+def toCoord(tok):
+    loc = ""
+    deci = False
+
+    if tok[0] == '.':
+        deci = True
+        loc += "0."
+        tok = tok[1:]
+
+    for c in tok:
+        if c == '.':
+            if not deci:
+                loc += '.'
+                deci = True
+            else:
+                return (loc, '')
+
+        if c.isdigit():
+            loc += c
+        if loc != "" and c in 'news':
+            return (loc, c)
+        
+    return (loc, '')
+
+print(None is not None)

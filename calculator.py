@@ -55,6 +55,11 @@ class Calculator:
             time = self.parseTime()
             if time:
                 print("Time:",time.show())
+                continue
+            loc = self.parseLocation()
+            if loc:
+                print("Lat:",loc[0], "Lon:",loc[1])
+            
             self.notMatchToken = ""
 
         
@@ -187,6 +192,67 @@ class Calculator:
         self.notMatchToken = t
         # print(t,2)
         return None
+    
+    def parseLocation(self):
+        t = self.notMatchToken
+        if t == "":
+            t = self.readToken()
+
+        loc1 = ("", '')
+        loc2 = ("", '')
+
+        def toCoord(tok):
+            loc = ""
+            deci = False
+
+            if tok[0] == '.':
+                deci = True
+                loc += "0."
+                tok = tok[1:]
+
+            for c in tok:
+                if c == '.':
+                    if not deci:
+                        loc += '.'
+                        deci = True
+                    else:
+                        return (loc, '')
+
+                if c.isdigit():
+                    loc += c
+                if loc != "":
+                    if c in 'ne':
+                        return (loc, c)
+                    if c == 's':
+                        return ('-'+loc, 'n')
+                    if c == 'w':
+                        return ('-'+loc, 'e')
+                
+            return (loc, '')
+        
+        prg = self.readProgress
+        t0 = t
+        loc1 = toCoord(t)
+        if loc1 != ("", ''):
+            if loc1[1] == '' and self.precSymbol() == '-':
+                loc1 = '-'+loc1[0], 'n'
+
+            t = self.readToken()
+            loc2 = toCoord(t)
+            if loc2 != ("", ''):
+                if loc2[1] == '' and self.precSymbol() == '-':
+                    loc2 = '-'+loc2[0], 'e'
+            else:
+                self.readProgress = prg
+                t = t0
+
+        if loc1 == ("", '') or loc2 == ("", ''):
+            self.notMatchToken = t
+            return None
+        
+        if loc1[1] == 'e':
+            return (float(loc2[0]), float(loc1[0]))
+        return (float(loc1[0]), float(loc2[0]))
 
     def readToken(self):
         haveToken = False
@@ -211,8 +277,10 @@ class Calculator:
        
 
 c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
-c.taskDesc = "what time of dhabi on june 25, 27 of july is the 08_32/15 pm sun height 75 degree?"
+c.taskDesc = "what time of dhabi on june 25, 27 of july is the 12:31_15 am sun at 103E, 37N height 75 degree?"
 c.parseTask()
+
+
 '''
 calculate the sunset hour of london on june 25
 what time of dhabi on june 25 is the sun height 75 degree?
