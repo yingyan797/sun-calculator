@@ -1,6 +1,6 @@
 import numpy as np
-from util import Util
-from model import sunDirectLatSin, noonSecs
+import model
+import util
 from dateTime import Time,Date, dsecs
 
 def triangular(lat, dlon):
@@ -20,43 +20,43 @@ def sunVectorSet(lat, noonShift):
 
 def sunHeight(sinlat0, lat, noonShift):
     
-    sun = np.array([0, np.cos(lat0), sinlat0])
+    sun = np.array([0, util.latSinToCos(sinlat0), sinlat0])
     loc = sunVectorSet(lat, noonShift)[0]
-    return np.pi/2-np.arccos(vecAngleCos(sun, loc)),0
+    return np.pi/2-np.arccos(util.vecAngleCos(sun, loc)),0
     
 def sunGeometric(sinlat0, lat, noonShift):
     loc, east, north = sunVectorSet(lat, noonShift)
-    sun = np.array([0, np.cos(lat0), np.sin(lat0)])
-    ht = np.pi/2-np.arccos(vecAngleCos(sun, loc))
-    ort = debase(sun, loc)
-    ang = np.arccos(vecAngleCos(ort, north))
+    sun = np.array([0, util.latSinToCos(sinlat0), sinlat0])
+    ht = np.pi/2-np.arccos(util.vecAngleCos(sun, loc))
+    ort = util.debase(sun, loc)
+    ang = np.arccos(util.vecAngleCos(ort, north))
     if (np.dot(ort, east) < 0):
         ang = 2*np.pi-ang
     return ang, ht
 
 def sunTimePosition(lat, lon, gmt, date, time):
-    noon = noonSecs(gmt, lon)
-    lat0 = np.arcsin(sunDirectLatSin(date))
-    ang, ht = sunGeometric(lat0, lat, [noon, time.toSecs()])
-    return "Sun height: "+str(toDeg(ht))+"; Sun direction: "+str(toDeg(ang))
+    noon = model.noonSecs(gmt, lon)
+    sinlat0 = model.sunDirectLatSin(date)
+    ang, ht = sunGeometric(sinlat0, util.toRad(lat), [noon, time.toSecs()])
+    return "Sun height: "+str(util.toDeg(ht))+"; Sun direction: "+str(util.toDeg(ang))
 
 def approachTime(sinlat0, lat, noon, calc, low, high, std):
     tl = low
     th = high
     t = tl
     while True:
-      diff = calc(lat0, lat, [noon, t])[0] - std
+      diff = calc(sinlat0, lat, [noon, t])[0] - std
       if diff < 0:
           tl = t
           if (th-t <= 1):
-              if abs(diff) > abs(calc(lat0, lat, [noon, th])[0] - std):
+              if abs(diff) > abs(calc(sinlat0, lat, [noon, th])[0] - std):
                   t = th
               break
           t = int((th+t)/2)   
       else:
           th = t
           if (t-tl <= 1):
-              if abs(diff) > abs(calc(lat0, lat, [noon, tl])[0] - std):
+              if abs(diff) > abs(calc(sinlat0, lat, [noon, tl])[0] - std):
                   t = tl
               break
           t = int((t+tl)/2)
@@ -65,7 +65,7 @@ def approachTime(sinlat0, lat, noon, calc, low, high, std):
 def approachDate(lat, noon, summer, time, calc, std):
     ref = Date(2,28).daysToRef(Date(1,1))
     secs = time.toSecs()
-    preDiff = calc(np.arcsin(sunDirectLatSin(0)), lat, [noon, secs])[0] - std
+    preDiff = calc(model.sunDirectLatSin(0), lat, [noon, secs])[0] - std
     minDays = []
     for d in range(1,365):
         days = d
@@ -74,14 +74,13 @@ def approachDate(lat, noon, summer, time, calc, std):
         if len(summer) > 0:
             if d in range(summer[0], summer[1]):
                 noon += 3600
-        lat0 = np.arcsin(sunDirectLatSin(days))
-        res = calc(lat0, lat, [noon, secs])[0]
+        res = calc(model.sunDirectLatSin(days), lat, [noon, secs])[0]
         diff = res - std
         if diff * preDiff < 0:
             if abs(diff) > abs(preDiff):
-                minDays.append(daysToDate(days - 1))
+                minDays.append(util.daysToDate(days - 1))
             else:
-                minDays.append(daysToDate(days))
+                minDays.append(util.daysToDate(days))
             print(res)
         preDiff = diff
     
@@ -94,32 +93,31 @@ def approachLat(lat0, noon, time, calc, std):
     lat = latl
     preDiff = calc(np.arcsin(lat0), )
     while lat <= lath:
-
-    return lon, lat
+        break
+    return lat
 
 def sunHeightTimeLim(lat, lon, gmt, date, ht):
-    ht = toRad(ht)
-    lat = toRad(lat)
-    noon = noonSecs(gmt, lon)
-    lat0 = np.arcsin(sunDirectLatSin(date))
-    if sunHeight(lat0, lat, [0])[0] < ht or sunHeight(lat0, lat, [-np.pi])[0] > ht:
+    ht = util.toRad(ht)
+    lat = util.toRad(lat)
+    noon = model.noonSecs(gmt, lon)
+    sinlat0 = model.sunDirectLatSin(date)
+    if sunHeight(sinlat0, lat, [0])[0] < ht or sunHeight(sinlat0, lat, [-np.pi])[0] > ht:
       print("Sun height not reachable")
-      return secondsToTime(0)
-    t = approachTime(lat0, lat, noon, sunHeight, noon-dsecs/2, noon, ht)
-    return secondsToTime(t), secondsToTime(2*noon-t)      
+      return util.secondsToTime(0)
+    t = approachTime(sinlat0, lat, noon, sunHeight, noon-dsecs/2, noon, ht)
+    return util.secondsToTime(t), util.secondsToTime(2*noon-t)      
 
 def sunDirectionTimeLim(lat, lon, gmt, date, ort):
-    ort = toRad(ort)
-    lat = toRad(lat)
-    noon = noonSecs(gmt, lon)
-    lat0 = np.arcsin(sunDirectLatSin(date))
-    t = approachTime(lat0, lat, noon, sunGeometric, noon-dsecs/2, noon+dsecs/2, ort)
-    return secondsToTime(t)
+    ort = util.toRad(ort)
+    lat = util.toRad(lat)
+    noon = model.noonSecs(gmt, lon)
+    t = approachTime(model.sunDirectLatSin(date), lat, noon, sunGeometric, noon-dsecs/2, noon+dsecs/2, ort)
+    return util.secondsToTime(t)
 
 def sunDateLim(lat, lon, gmt, time, hod, ang):
-    ang = toRad(ang)
-    lat = toRad(lat)
-    noon = noonSecs(gmt, lon)
+    ang = util.toRad(ang)
+    lat = util.toRad(lat)
+    noon = model.noonSecs(gmt, lon)
     calc = sunHeight
     if not hod:
         calc = sunGeometric
@@ -128,5 +126,9 @@ def sunDateLim(lat, lon, gmt, time, hod, ang):
 
 
 def sunGeomLocLim(gmt, date, ht, ort, time):
-    lat0 = np.arcsin(sunDirectLatSin(date))
+    lat0 = np.arcsin(model.sunDirectLatSin(date))
 
+# t1, t2 = sunHeightTimeLim(30, 120, 8, Date(6,15), 50)
+# print(t1.show(), t2.show())
+# print(sunTimePosition(30, 120, 8, Date(6,15), t1))
+# print(sunGeometric(0, 0, [0]))

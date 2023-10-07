@@ -1,4 +1,5 @@
 from dateTime import Date, Time
+import util
 
 months = {
     "january": "1","jan": "1","february": "2","feb": "2","march": "3","mar": "3","april": "4","apr": "4","may": "5",
@@ -8,29 +9,32 @@ months = {
 
 querySet = {
     "height": 1, "high": 1, "direction": 2, "orientation": 2, "time": 3, "date": 4, "day": 4,
-    "longitude": 5, "lon": 5, "latitude": 6, "lat": 6, "sunrise": 7, "sunset": 8, "above": 1, "below": 0
+    "longitude": 5, "lon": 5, "latitude": 6, "lat": 6, "sunrise": 7, "sunset": 8, "above": 1, "below": 0,
+    "altitude": 9, "elavation": 9
 }
 
 class Abstract:
     def __init__(self):
         self.queries = []
+
+    def clear(self):
+        self.queries = []
         self.angles = []
-        self.date, self.time, self.lat, self.lon, self.gmt, self.height, self.direction = None, None, None, None, None, None, None
+        self.date, self.time, self.lat, self.lon, self.gmt = None, None, None, None, None
+        self.height, self.direction, self.altitude = None, None, None
 
     def queryReduce(self):
         qi = 0
         while qi < len(self.queries):
             q = self.queries[qi]
-            if q <= 1:
-                if len(self.angles) > 0:
-                    self.queries.pop(qi)
-                    self.height = self.angles.pop(0)
-                    if q == 0:
-                        self.height *= -1
-            elif q == 2:
-                if len(self.angles) > 0:
-                    self.queries.pop(qi)
-                    self.direction = self.angles.pop(0)
+            if q <= 1 and len(self.angles) > 0:
+                self.queries.pop(qi)
+                self.height = self.angles.pop(0)
+                if q == 0:
+                    self.height *= -1
+            elif q == 2 and len(self.angles) > 0:
+                self.queries.pop(qi)
+                self.direction = self.angles.pop(0)
             elif q == 5 and self.lat == None:
                 self.queries.pop(qi)
             elif q == 4 and self.date:
@@ -44,7 +48,7 @@ class Abstract:
         qs = ["What is the height angle of the sun (below horizon)?", "What is the height angle of the sun (above horizon)?", 
               "What is the direction of the sun (angle clockwise from North)?", "What time of the day is it when", 
               "Which date is it when", "What is the longitude of a location where", "What is the latitude of a location where", 
-              "When does sunrise occur?", "When does sunset occur?"]
+              "When does sunrise occur?", "When does sunset occur?", "What altitude of observation (in meters) is it where"]
         question = qs[self.queries[0]]
         for qi in self.queries[1:]:
             question += "\nand\n"+qs[qi]
@@ -55,17 +59,10 @@ class Abstract:
             question += " the sun's direction is "+str(self.direction)+" degree clockwise from North?"
         
         question += " Given that:\n"
-        if self.lat:
-            question += "  At location "
-            if self.lat > 0:
-                question += str(self.lat)+"N,"
-            if self.lat < 0:
-                question += str(-self.lat)+"S,"
-        if self.lon:
-            if self.lon > 0:
-                question += " "+str(self.lon)+"E\n"
-            if self.lon < 0:
-                question += " "+str(-self.lon)+"W\n"
+        if self.lat is not None:
+            question += "  At geographical location "+util.showLat(self.lat)
+        if self.lon is not None:
+            question += " "+util.showLon(self.lon)+"\n"
         if self.gmt:
             question += "  Time zone is GMT"
             if self.gmt > 0:
@@ -76,10 +73,13 @@ class Abstract:
             question += "  On the date "+self.date.show()
         if self.time:
             question += "  At the time of "+self.time.show()
+        if self.altitude:
+            question += " Observing at an altitude of "+str(self.altitude)+" meters"
         
-        return question+'?'
+        return question
 
-            
+    def formResponse(self):
+        resp = 0  
     
     def show(self):
         print("=====")
@@ -96,63 +96,92 @@ class Abstract:
             print("no time")
 
 class Calculator:
-    def __init__(self, seps):
+    def __init__(self, seps, ab):
         self.seps = seps
         self.taskDesc = ""
-        self.readProgress = 0
-        self.notMatchToken = ""
+        self.abstract = ab
 
     def prompt(self):
         print("Hello earth scientist, I'm sun calculator.")
 
         while True:
-            self.taskDesc = input("**Please describe what you want to calculate, or press -Enter- to skip and fill a form.\n--")
-            if self.taskDesc == "":
+            c = input("**Please type your questions in txt. Press -Enter- to submit, or use any key to skip and fill a form.")
+            if c == '':
+                f = open("question.txt", "r")
+                qi = 0
+                notUnderstand = []
+                while True:
+                    self.taskDesc = f.readline()
+                    if self.taskDesc == "":
+                        break
+                    qi += 1
+                    print("-Received question", qi, self.taskDesc)
+                    self.parseTask()
+                    # self.abstract.show()
+                    if self.abstract.queries != []:
+                        print("You are asking:")
+                        print(self.abstract.formQuestion())
+                        fb = input("Am I correct? Yes (y) No (Enter)\n--")
+                        if fb == 'y':
+                            print("Here's my calculation:")
 
-                return
-            elif self.parseTask():
-                return
+                    else:
+                        fb = input("Sorry, I cannot understand question "+str(qi)+". Press -Enter- to continue.")
+                        notUnderstand.append("question "+str(qi)+': '+self.taskDesc)
+                f.close()
+                print("Calculation finished. Here are the questions not able to understand.")
+                for nu in notUnderstand:
+                    print(nu)
+                fb = input("Would you like to write these questions and edit them to calculate again? --")
+                if fb == 'y':
+                    f = open("question.txt", "w")
+                    for nu in notUnderstand:
+                        f.write(nu+'\n')
+                    f.close()
+                else:
+                    return
+
             else:
-                print("Sorry, I cannot understand your question. Could you describe differently or directly fill a form?")
+                return
     
     def parseTask(self):
-        ab = Abstract()
+        self.abstract.clear()
+        self.readProgress = 0
+        self.notMatchToken = ""
+
         while self.readProgress < len(self.taskDesc):
             date = self.parseDate()
             if date:
-                ab.date = date
+                self.abstract.date = date
                 continue
             time = self.parseTime()
             if time:
-                ab.time= time
+                self.abstract.time= time
                 continue
             lat, lon = self.parseLocation()
-            if lon:
-                ab.lat = lat
-                ab.lon = lon
+            if lon is not None:
+                self.abstract.lat = lat
+                self.abstract.lon = lon
                 continue
             gmt = self.parseGMT()
             if gmt:
-                ab.gmt = gmt
+                self.abstract.gmt = gmt
                 continue
             
             angle = self.parseAngle()
             if angle:
-                ab.angles.append(angle)
+                self.abstract.angles.append(angle)
                 continue
 
             query = self.parseQuery()
             if query:
                 i = querySet[query]
-                if i not in ab.queries:
-                    ab.queries.append(i)
+                if i not in self.abstract.queries:
+                    self.abstract.queries.append(i)
 
-            print(self.notMatchToken,"-")
             self.notMatchToken = ""
-        ab.queryReduce()
-        # ab.show()
-        print(ab.formQuestion())
-
+        # self.abstract.show()
+        self.abstract.queryReduce()
         
     def parseDate(self):
         t = self.notMatchToken
@@ -297,11 +326,6 @@ class Calculator:
             d = ''
             deci = False
 
-            if tok[0] == '.':
-                deci = True
-                loc += "0."
-                tok = tok[1:]
-
             for c in tok:
                 if c == '.':
                     if not deci:
@@ -310,11 +334,13 @@ class Calculator:
                     else:
                         break
 
-                if c.isdigit():
+                elif c.isdigit():
                     loc += c
                 if loc != "" and c in 'news':
                     d = c
                     break
+            if loc != "" and loc[0] == '.':
+                loc = '0'+loc
 
             prg = self.readProgress
             if loc != "" and d == '':
@@ -349,7 +375,6 @@ class Calculator:
 
             prg = self.readProgress
             t0 = t
-            print("t0", t0)
             t = self.readToken()
             loc2 = toCoord(t)
 
@@ -426,6 +451,8 @@ class Calculator:
                 ang += c
             else:
                 break
+        if ang != "" and ang[0] == '.':
+            ang  = '0'+ang
 
         t0 = t
         prg = self.readProgress
@@ -461,12 +488,12 @@ class Calculator:
         return self.taskDesc[self.readProgress-1]
        
 
-c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
-c.taskDesc = "calculate the sunset hour of london 51N 0.1E gmt+1 on june 25"
-c.parseTask()
+c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }", Abstract())
+c.prompt()
 
 
 '''
+calculate the sunset hour of london 51N 0.1E gmt+1 on june 25
 what is the sunrise hour at chicago gmt-5 51N 0w on july 4th?
 calculate the sunset hour of london on june 25
 what time of dhabi on june 25 is the sun height 75 degree?

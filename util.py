@@ -1,90 +1,78 @@
 import numpy as np
 from dateTime import Time, Date, mdays, dsecs
 
-class Util:
-    def arcCap(ac):
-        if ac > 1:
-            return 1
-        if ac < -1:
-            return -1
-        return ac
-    
-    def sinToCos(asin):
-        if asin >= 0:
-            return np.sqrt(1-pow(asin, 2))
-        return -np.sqrt(1-pow(asin, 2))
+def arcCap(ac):
+    if ac > 1:
+        return 1
+    if ac < -1:
+        return -1
+    return ac
 
-    def toRad(deg):
-        return deg*np.pi/180
-    def toDeg(rad):
-        return rad*180/np.pi
+def latSinToCos(asin):
+    if asin >= 1 or asin <= -1:
+        return 0
+    return np.sqrt(1-pow(asin, 2))
 
-    def n2norm(vec):
-        sum = 0
-        for c in vec:
-            sum += pow(c,2)
-        return np.sqrt(sum)
+def toRad(deg):
+    return deg*np.pi/180
+def toDeg(rad):
+    return rad*180/np.pi
 
-    def unit(vec):
-        return vec/Util.n2norm(vec)    
+def n2norm(vec):
+    sum = 0
+    for c in vec:
+        sum += pow(c,2)
+    return np.sqrt(sum)
 
-    def project(vec, base):
-        legnth = np.dot(vec, base)/n2norm(base)
-        return legnth * unit(base)
+def unit(vec):
+    return vec/n2norm(vec)    
 
-    def debase(vec, base):
-        return vec-project(vec, base)
+def project(vec, base):
+    legnth = np.dot(vec, base)/n2norm(base)
+    return legnth * unit(base)
 
-    def vecAngleCos(v1, v2):
-        return arcCap(np.dot(v1, v2)/(n2norm(v1) * n2norm(v2)))     
+def debase(vec, base):
+    return vec-project(vec, base)
 
-    def daysToDate(days):
-        month = 1
-        day = 0
-        for md in mdays:
-            if days > md:
-                month += 1
-                days -= md
-            else:
-                day = np.ceil(days)
-                break
-        return Date(month, int(day))
+def vecAngleCos(v1, v2):
+    return arcCap(np.dot(v1, v2)/(n2norm(v1) * n2norm(v2)))     
 
-    def secondsToTime(secs):
-        d = 0
-        if (secs >= 0):
-            d = int(secs/dsecs)
+def daysToDate(days):
+    month = 1
+    day = 0
+    for md in mdays:
+        if days > md:
+            month += 1
+            days -= md
         else:
-            d = int((1+secs)/dsecs)-1
-        secs -= dsecs*d
-        h = int(secs/3600)
-        secs -= 3600*h
-        m = int(secs/60)
-        secs -= 60*m
-        return Time(h, m ,secs, d)
-    
-def toCoord(tok):
-    loc = ""
-    deci = False
+            day = np.ceil(days)
+            break
+    return Date(month, int(day))
 
-    if tok[0] == '.':
-        deci = True
-        loc += "0."
-        tok = tok[1:]
+def secondsToTime(secs):
+    d = 0
+    if (secs >= 0):
+        d = int(secs/dsecs)
+    else:
+        d = int((1+secs)/dsecs)-1
+    secs -= dsecs*d
+    h = int(secs/3600)
+    secs -= 3600*h
+    m = int(secs/60)
+    secs -= 60*m
+    return Time(h, m ,secs, d)
 
-    for c in tok:
-        if c == '.':
-            if not deci:
-                loc += '.'
-                deci = True
-            else:
-                return (loc, '')
+def showLon(lon):
+    if lon > 0:
+        return str(lon)+'E'
+    if lon < 0:
+        return str(-lon)+'W'
+    return str(lon)
 
-        if c.isdigit():
-            loc += c
-        if loc != "" and c in 'news':
-            return (loc, c)
-        
-    return (loc, '')
+def showLat(lat):
+    if lat > 0:
+        return str(lat)+'N'
+    if lat < 0:
+        return str(-lat)+'S'
+    return str(lat)
 
-print(None is not None)
