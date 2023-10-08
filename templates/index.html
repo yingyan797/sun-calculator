@@ -27,13 +27,13 @@
     <h1>Y-EARTH Sun Calculator</h1>
     <div class="row">
         <div class="column">
+            <form action="/maps" method="post">
+                <b><label for="location">Find location on maps</label></b>
+                <input type="text" name="location">
+                <button type="submit">Search</button>
+            </form>
             <form action="/" method="post" id="questions">
                 <div>
-                    <form action="/maps" method="post">
-                        <b><label for="location">Find location on maps</label></b>
-                        <input type="text" name="location">
-                        <button type="submit">Search</button>
-                    </form>
                     <h2>Describe all questions in words.</h2>
                     <p>Write any number of questions, each one in a new line. Each question can contain multiple
                         queries (E.g. sunrise and sunset, height and direction, etc.) if given same context.
