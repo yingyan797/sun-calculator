@@ -1,11 +1,69 @@
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Y-EARTH Sun Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sun Calculator</title>
+    <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    /* Create two equal columns that floats next to each other */
+    .column {
+      float: left;
+      width: 50%;
+      padding: 10px;
+      height: 300px; /* Should be removed. Only for demonstration */
+    }
+    
+    /* Clear floats after the columns */
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+    </style>
 </head>
 
 <body>
-    <table Y-EARTH Sun Calculator></table>
-    <button id="calculate" class="btn btn-primary mb-2">Calculate</button>
+    <div class="row">
+        <div class="column">
+            <div>
+                <h2>Describe questions in sentences</h2>
+                <p>Write any number of questions, each one in a new line.</p>
+                <textarea form="questions" rows="10" cols="90"></textarea><br><br>     
+                <button>Calculate>></button>
+            </div>
+            <div>
+                <h2>Or by filling in a form </h2>
+                <h4>Your questions</h4>
+                <label for="Sunrise">Sunrise</label>
+                    <input type="checkbox" name="Sunrise" id="Sunrise" value="Sunrise">
+                <label for="Sunset">Sunset</label>
+                    <input type="checkbox" name="Sunset" id="Sunset" value="Sunset">
+                <label for="Height">Height</label>
+                    <input type="checkbox" name="Height" id="Height" value="Height">
+                <label for="Direction">Direction</label>
+                    <input type="checkbox" name="Direction" id="Direction" value="Direction"><br>
+                <h4>Given conditions</h4>
+                <label for="Longitude">Longitude</label><input type="text" name="Longitude" id="Longitude"><br>
+                <label for="Latitude">Latitude</label><input type="text" name="Latitude" id="Latitude"><br>
+                <label for="Date">Date</label><input type="date" name="Date" id="Date"><br>
+                <label for="Time">Time</label><input type="time" name="Time" id="Time"><br>
+                <label for="GMT">GMT</label><input type="number" name="GMT" id="GMT"><br>    
+                <button>Calculate>></button>
+            </div>
+
+        </div>
+        <div class="column">
+            <div>
+                <h2>This is how we understand your questions</h2>
+                <p>You are asking...</p>
+            </div>
+            <div>
+                <h2>Calculation result</h2>
+                <p>This is the result</p>
+                <button>Continue to the next questions</button>
+            </div>
+          
+        </div>
+    </div>
 </body>
