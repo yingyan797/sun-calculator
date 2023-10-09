@@ -92,3 +92,29 @@ def validLat(lat):
 def validLon(lon):
     return lon in range(-180, 181)
 
+def findFloat(tok):
+    dot = False
+    neg = False
+    digit = False
+    num = ""
+    i = 0
+    while i < len(tok):
+        c = tok[i]
+        if not dot and not neg and c == '-':
+            neg = True
+            num += c
+            i += 1
+        elif not dot and c == '.':
+            dot = True
+            num += c
+            i += 1
+        elif c.isdigit():
+            if not digit:
+                digit = True
+            num += c
+            i += 1
+        else:
+            break
+    if digit:
+        return num, i
+    return "", i

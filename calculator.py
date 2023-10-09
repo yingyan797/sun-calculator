@@ -8,7 +8,7 @@ months = {
 }
 
 querySet = {
-    "height": 1, "high": 1, "direction": 2, "orientation": 2, "time": 3, "date": 4, "day": 4,
+    "height": 1, "ht": 1, "high": 1, "direction": 2, "dir": 2, "orientation": 2, "time": 3, "date": 4, "day": 4,
     "longitude": 5, "lon": 5, "latitude": 6, "lat": 6, "sunrise": 7, "sunset": 8, "above": 1, "below": 0,
     "altitude": 9, "elavation": 9
 }
@@ -81,7 +81,7 @@ class Abstract:
         if self.details[3]:
             self.interpret += "  At the time of "+self.details[3].show()
         if self.details[9]:
-            self.interpret += " Observing at an altitude of "+str(self.details[9])+" meters"
+            self.interpret += " Observing at an altitude of "+str(self.details[9])+self.details[0]
         
 
     def formResponse(self):
@@ -139,14 +139,19 @@ class Calculator:
                 ab.details[6] = lat
                 ab.details[5] = lon
                 continue
+            
             gmt = self.parseGMT()
             if gmt:
                 ab.gmt = gmt
                 continue
             
-            angle = self.parseAngle()
-            if angle:
-                ab.angles.append(angle)
+            num, unit = self.parseAngleAltitude()
+            if num:
+                if unit != "deg":
+                    ab.details[9] = num
+                    ab.details[0] = unit
+                else:
+                    ab.angles.append(num)
                 continue
 
             query = self.parseQuery()
@@ -193,7 +198,7 @@ class Calculator:
                 fromDay = toDayStr(t)
             
         elif t.isnumeric():  
-            if int(t) in range(1,13) and self.precSymbol() in ",_/-\\":
+            if int(t) in range(1,13) and self.precSymbol() in "_/\\":
                 # 7/4 07-04
                 fromMonth = t
                 prg = self.readProgress
@@ -241,7 +246,7 @@ class Calculator:
         fromSecond = "0"
         day = 0
         noon = ""
-        seps = ":,_/-\\"
+        seps = ":_/\\"
 
         t = self.notMatchToken
         if t == "":
@@ -258,7 +263,7 @@ class Calculator:
                         if len(t) == 6 and int(t[4:]) < 60:
                             fromSecond = t[4:]
             
-            elif len(t) == 2 and self.precSymbol() in seps :
+            elif len(t) <= 2 and self.precSymbol() in seps :
                 prg = self.readProgress
                 if int(t) <= 24:
                     fromHour = t
@@ -302,28 +307,16 @@ class Calculator:
         loc2 = ("", '')
         
         def toCoord(tok):
-            loc = ""
+            loc, i = util.findFloat(tok)
             d = ''
-            deci = False
-
-            for c in tok:
-                if c == '.':
-                    if not deci:
-                        loc += '.'
-                        deci = True
-                    else:
-                        break
-
-                elif c.isdigit():
-                    loc += c
-                if loc != "" and c in 'news':
-                    d = c
-                    break
-            if loc != "" and loc[0] == '.':
-                loc = '0'+loc
+            if loc != "":
+                if i < len(tok) and tok[i] in "news":
+                    d = tok[i]
+            else:
+                return ("", '')
 
             prg = self.readProgress
-            if loc != "" and d == '':
+            if loc[0] != '-' and d == '':
                 t = self.readToken()
                 if t in ["degree", "deg", "deg.", "d.", "d"]:
                     t = self.readToken()
@@ -338,7 +331,7 @@ class Calculator:
                 else:
                     self.readProgress = prg
 
-            if loc != "" and d != '':
+            if loc[0] != '-' and d != '':
                 if d == 's':
                     d = 'n'
                     loc = '-' + loc
@@ -350,18 +343,13 @@ class Calculator:
         
         loc1 = toCoord(t)
         if loc1 != ("", ''):
-            if loc1[1] == '' and self.precSymbol() == '-':
-                loc1 = '-'+loc1[0], 'n'
 
             prg = self.readProgress
             t0 = t
             t = self.readToken()
             loc2 = toCoord(t)
 
-            if loc2 != ("", ''):
-                if loc2[1] == '' and self.precSymbol() == '-':
-                    loc2 = '-'+loc2[0], 'e'
-            elif loc1[1] != '':
+            if loc2 == ("", '') and loc1[1] != '':
                 self.readProgress = prg
                 self.notMatchToken = t0
                 return (None, float(loc1[0]))
@@ -416,37 +404,52 @@ class Calculator:
         self.notMatchToken = t
         return None
             
-    def parseAngle(self):
+    def mapUnit(tok):
+        degs = ["degree", "deg", "d"]
+        ms = ["m", "meter", "meters", "metre", "metres"]
+        kms = ["km", "kilometer", "kilometers", "kilometre", "kilometres"]
+        if tok in degs:
+            return "deg"
+        elif tok in ms:
+            return "m"
+        elif tok in kms:
+            return "km"
+        return None
+
+    def parseAngleAltitude(self):
         t = self.notMatchToken
         if t == "":
             t = self.readToken()
 
-        ang = ""
-        deci = False
-        for c in t:
-            if not deci and c == '.':
-                ang += '.'
-                deci = True
-            elif c.isdigit():
-                ang += c
-            else:
+        ang, i = util.findFloat(t)
+        cont = ""
+        while i < len(t):
+            c = t[i]
+            if c in ".-":
                 break
-        if ang != "" and ang[0] == '.':
-            ang  = '0'+ang
+            cont += t[i]
+            i += 1
+
+        if ang != "":
+            unit = Calculator.mapUnit(cont)
+            if unit:
+                self.notMatchToken = ""
+                return float(ang), unit
 
         t0 = t
         prg = self.readProgress
         t = self.readToken()
-        if t in ["degree", "deg", "deg.", "d", "d."]:
-            self.notMatchToken = ""
-            return float(ang)
+        if ang != "":
+            unit = Calculator.mapUnit(t)
+            if unit:
+                self.notMatchToken = ""
+                return float(ang), unit
         t = t0
         self.readProgress = prg
 
         self.notMatchToken = t
-        return None
+        return None, None
         
-
     def readToken(self):
         haveToken = False
         token = ""
@@ -469,9 +472,10 @@ class Calculator:
         return self.taskDesc[self.readProgress-1]
        
 
-c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
-c.parseTask("Abu dhabi sunset hour\nlondon sun height july 4")
-
+# c = Calculator("~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n }")
+# c.parseTask("Abu dhabi sunset hour\nlondon sun height july 4")
+# print(util.findFloat("0.-2e2.5e25"))
+# print(float("-.25"))
 
 '''
 calculate the sunset hour of london 51N 0.1E gmt+1 on june 25

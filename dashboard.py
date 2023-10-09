@@ -2,7 +2,7 @@ from flask import Flask, render_template, request,session, redirect, flash, json
 import calculator as sc
 
 app = Flask(__name__)
-calc = sc.Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
+calc = sc.Calculator("~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n }")
 
 @app.route('/', methods=['GET', 'POST']) # show the main page
 def index():

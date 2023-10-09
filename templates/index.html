@@ -38,7 +38,7 @@
                     <p>Write any number of questions, each one in a new line. Each question can contain multiple
                         queries (E.g. sunrise and sunset, height and direction, etc.) if given same context.
                     </p>
-                    <textarea name="taskDesc" rows="5" cols="90"></textarea><br><br>     
+                    <textarea name="taskDesc" rows="5" cols="85"></textarea><br><br>     
                     <button type="submit">Submit question>></button>
                 </div>
                 <div>
@@ -86,7 +86,7 @@
                     <b>Question {{ab.num}}</b>
                     <label for="adding">Add details</label><input type="radio" name="adding" form="questions">
                     <button type="submit">Confirm and calculate</button><br>
-                    <textarea name="Question{{ab.num}}" cols="90" rows="1">{{ab.taskDesc}}</textarea>
+                    <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea>
                     You are asking:
                     <b>{{ab.interpret}}</b><br><br>
                         
