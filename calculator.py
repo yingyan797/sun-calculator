@@ -14,14 +14,18 @@ querySet = {
 }
 
 class Abstract:
-    def __init__(self, taskDesc):
+    def __init__(self, taskDesc, num):
         self.taskDesc = taskDesc
+        self.num = num
+        self.interpret = ""
+        self.response = ""
 
     def clear(self):
         self.queries = []
         self.angles = []
         self.gmt = 0
         self.details = [None for i in range(10)]
+        self.interpret = ""
 
     def queryReduce(self):
         qi = 0
@@ -45,42 +49,40 @@ class Abstract:
                 qi += 1
 
     def formQuestion(self):
-        question = ""
         if self.queries == []:
-            question += "Sorry, I can't unserstand your question."
-            return question
+            self.interpret += "Sorry, I can't unserstand your question."
+            return
         qs = ["What is the height angle of the sun (below horizon)?", "What is the height angle of the sun (above horizon)?", 
               "What is the direction of the sun (angle clockwise from North)?", "What time of the day is it when", 
               "Which date is it when", "What is the longitude of a location where", "What is the latitude of a location where", 
               "When does sunrise occur?", "When does sunset occur?", "What altitude of observation (in meters) is it where"]
-        question += qs[self.queries[0]]
+        self.interpret += qs[self.queries[0]]
         for qi in self.queries[1:]:
-            question += "\nand\n"+qs[qi]
+            self.interpret += "\nand\n"+qs[qi]
 
         if self.details[1]:
-            question += " the sun is at "+str(self.details[1])+" degree above horizon?"
+            self.interpret += " the sun is at "+str(self.details[1])+" degree above horizon?"
         if self.details[2]:
-            question += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
+            self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
         
-        question += " Given that:\n"
+        self.interpret += " Given that:\n"
         if self.details[6] is not None:
-            question += "  At geographical location "+util.showLat(self.details[6])
+            self.interpret += "  At geographical location "+util.showLat(self.details[6])
         if self.details[5] is not None:
-            question += " "+util.showLon(self.details[5])+"\n"
+            self.interpret += " "+util.showLon(self.details[5])+"\n"
         if self.gmt:
-            question += "  Time zone is GMT"
+            self.interpret += "  Time zone is GMT"
             if self.gmt > 0:
-                question += '+'+str(self.gmt)+'\n'
+                self.interpret += '+'+str(self.gmt)+'\n'
             else:
-                question += str(self.gmt)+'\n'
+                self.interpret += str(self.gmt)+'\n'
         if self.details[4]:
-            question += "  On the date "+self.details[4].show()
+            self.interpret += "  On the date "+self.details[4].show()
         if self.details[3]:
-            question += "  At the time of "+self.details[3].show()
+            self.interpret += "  At the time of "+self.details[3].show()
         if self.details[9]:
-            question += " Observing at an altitude of "+str(self.details[9])+" meters"
+            self.interpret += " Observing at an altitude of "+str(self.details[9])+" meters"
         
-        return question
 
     def formResponse(self):
         resp = 0  
@@ -111,51 +113,56 @@ class Calculator:
                         ci += 1
                     else:
                         break
-
-            self.readProgress = 0
-            self.notMatchToken = ""
-            ab = Abstract("Question "+str(len(self.abstracts)+1)+": "+self.taskDesc)
-            ab.clear()
-
-            while self.readProgress < len(self.taskDesc):
-                date = self.parseDate()
-                if date:
-                    ab.details[4] = date
-                    continue
-                time = self.parseTime()
-                if time:
-                    ab.details[3] = time
-                    continue
-                lat, lon = self.parseLocation()
-                if lon is not None:
-                    ab.details[6] = lat
-                    ab.details[5] = lon
-                    continue
-                gmt = self.parseGMT()
-                if gmt:
-                    ab.gmt = gmt
-                    continue
-                
-                angle = self.parseAngle()
-                if angle:
-                    ab.angles.append(angle)
-                    continue
-
-                query = self.parseQuery()
-                if query:
-                    i = querySet[query]
-                    if i not in ab.queries:
-                        ab.queries.append(i)
-
-                self.notMatchToken = ""
-
-            self.taskDesc = ""
-            ab.queryReduce()
-            self.abstracts.append(ab)
+            self.abstracts.append(self.parseDesc(len(self.abstracts)+1)) 
+            
             if ci >= len(tasks):
                 break
         return self.abstracts
         
+    def parseDesc(self, abi):
+        self.readProgress = 0
+        self.notMatchToken = ""
+        ab = Abstract(self.taskDesc, abi)
+        ab.clear()
+
+        while self.readProgress < len(self.taskDesc):
+            date = self.parseDate()
+            if date:
+                ab.details[4] = date
+                continue
+            time = self.parseTime()
+            if time:
+                ab.details[3] = time
+                continue
+            lat, lon = self.parseLocation()
+            if lon is not None:
+                ab.details[6] = lat
+                ab.details[5] = lon
+                continue
+            gmt = self.parseGMT()
+            if gmt:
+                ab.gmt = gmt
+                continue
+            
+            angle = self.parseAngle()
+            if angle:
+                ab.angles.append(angle)
+                continue
+
+            query = self.parseQuery()
+            if query:
+                i = querySet[query]
+                if i not in ab.queries:
+                    ab.queries.append(i)
+
+            self.notMatchToken = ""
+
+        self.taskDesc = ""
+        ab.queryReduce()
+        ab.formQuestion()
+        return ab
+
+    
     def parseDate(self):
         t = self.notMatchToken
         if t == "":

@@ -79,19 +79,19 @@
 
         </div>
         <div class="column">
-            <div>
-                <h2>This is how we understand your questions</h2>
+            <form action="/" method="post">
+                <h2>Question confirmation and result</h2>
+                <button type="submit">Change descriptions</button><br><br>
                 {% for ab in abstracts %}
-                    <p>{{ab.taskDesc}}</p>
-                    <b>{{ab.formQuestion()}}</b>
+                    <b>Question {{ab.num}}</b>
+                    <label for="adding">Add details</label><input type="radio" name="adding" form="questions">
+                    <button type="submit">Confirm and calculate</button><br>
+                    <textarea name="Question{{ab.num}}" cols="90" rows="1">{{ab.taskDesc}}</textarea>
+                    You are asking:
+                    <b>{{ab.interpret}}</b><br><br>
+                        
                 {% endfor %}
-            </div>
-            <div>
-                <h2>Calculation result</h2>
-                <p>This is the result</p>
-                <button>Continue to the next questions</button>
-            </div>
-          
+            </form>
         </div>
     </div>
 </body>

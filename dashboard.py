@@ -4,15 +4,21 @@ import calculator as sc
 app = Flask(__name__)
 calc = sc.Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
 
-
 @app.route('/', methods=['GET', 'POST']) # show the main page
 def index():
     tasks = request.form.get('taskDesc')
-    print(tasks, "tasks")
+    print(request.form)
     if tasks is not None and tasks != "":
-        abstracts= calc.parseTask(tasks)
-        return render_template('index.html', abstracts=abstracts)
-    return render_template('index.html')
+        calc.parseTask(tasks)
+    else:
+        for abi in range(len(calc.abstracts)):
+            ab = calc.abstracts[abi]
+            td = request.form.get("Question"+str(ab.num))
+            if td is not None and td != ab.taskDesc:
+                calc.taskDesc = td
+                calc.abstracts[abi] = calc.parseDesc(ab.num)
+
+    return render_template('index.html', abstracts=calc.abstracts)
 
 @app.route('/maps', methods=['GET', 'POST']) # show the main page
 def maps():
