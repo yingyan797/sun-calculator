@@ -48,24 +48,26 @@
                     </p>
                     <b>You are asking for:</b><br>
                     <label for="Sunrise">Sunrise</label>
-                        <input type="checkbox" name="Sunrise" value=7>
+                        <input type="checkbox" name="Sunrise">
                     <label for="Sunset">Sunset</label>
-                        <input type="checkbox" name="Sunset" value=8>
+                        <input type="checkbox" name="Sunset">
                     <label for="Height">Height</label>
-                        <input type="checkbox" name="Height" value=1>
+                        <input type="checkbox" name="Height">
                     <label for="Direction">Direction</label>
-                        <input type="checkbox" name="Direction" value=2>
+                        <input type="checkbox" name="Direction">
                     <label for="Date">Date</label>
-                        <input type="checkbox" name="QDate" value=4>
+                        <input type="checkbox" name="QDate">
                     <label for="Time">Time</label>
-                        <input type="checkbox" name="QTime" value=3>
+                        <input type="checkbox" name="QTime">
                     
                     <br><br><b>Given conditions</b><br>
                     <label for="Longitude">Longitude:</label><input type="text" name="Longitude"></label> 
                         <label for="East">East</label><input type="radio" name="EW" value="East"><label for="West">West</label><input type="radio" name="EW" value="West"><br>
                     <label for="Latitude">Latitude:</label><input type="text" name="Latitude"></label>
                         <label for="North">North</label><input type="radio" name="NS" value="North"><label for="South">South</label><input type="radio" name="NS" value="South"><br>
-                    <label for="Date">Date</label><input type="date" name="Date">
+                    <label for="Altitude">Altitude</label><input type="text" name="Altitude">
+                    <label for="m">m</label><input type="radio" name="unit" value="m"><label for="km">km</label><input type="radio" name="unit" value="km"><br>
+                        <label for="Date">Date</label><input type="date" name="Date">
                     <label for="Time">Time</label><input type="time" name="Time">
                     <label for="GMT">GMT</label><input type="number" name="GMT"><br><br>    
                     <button type="submit">Submit form>></button>
@@ -77,6 +79,7 @@
             <div>
                 <h2>This is how we understand your questions</h2>
                 <p>You are asking...</p>
+                {{understand}}
             </div>
             <div>
                 <h2>Calculation result</h2>

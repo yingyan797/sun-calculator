@@ -45,6 +45,8 @@ class Abstract:
                 qi += 1
 
     def formQuestion(self):
+        if self.queries == []:
+            return ""
         qs = ["What is the height angle of the sun (below horizon)?", "What is the height angle of the sun (above horizon)?", 
               "What is the direction of the sun (angle clockwise from North)?", "What time of the day is it when", 
               "Which date is it when", "What is the longitude of a location where", "What is the latitude of a location where", 
@@ -182,6 +184,7 @@ class Calculator:
             self.notMatchToken = ""
         # self.abstract.show()
         self.abstract.queryReduce()
+        return self.abstract
         
     def parseDate(self):
         t = self.notMatchToken
@@ -490,7 +493,8 @@ class Calculator:
        
 
 c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }", Abstract())
-c.prompt()
+# c.parseTask().show()
+# c.prompt()
 
 
 '''
