@@ -76,3 +76,19 @@ def showLat(lat):
         return str(-lat)+'S'
     return str(lat)
 
+def toLonVal(num, ew):
+    if num > 0 and ew == "West":
+        return 0-num
+    return num
+
+def toLatVal(num, ns):
+    if num > 0 and ns == "South":
+        return 0-num
+    return num
+
+def validLat(lat):
+    return lat in range(-90, 91)
+
+def validLon(lon):
+    return lon in range(-180, 181)
+

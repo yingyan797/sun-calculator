@@ -2,24 +2,17 @@ from flask import Flask, render_template, request,session, redirect, flash, json
 import calculator as sc
 
 app = Flask(__name__)
-calc = sc.Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }", sc.Abstract())
+calc = sc.Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
 
 
 @app.route('/', methods=['GET', 'POST']) # show the main page
 def index():
-    print(request.form)
-    task = request.form.get('taskDesc')
-    fq = ""
-    if task is not None:
-        calc.taskDesc = task
-        ab = calc.parseTask()
-        fq = ab.formQuestion()
-    
-    if len(request.form) >= 0:
-        for (k,v) in request.form.items():
-            fq += k+": "+v+"; "
-    
-    return render_template('index.html', understand=fq)
+    tasks = request.form.get('taskDesc')
+    print(tasks, "tasks")
+    if tasks is not None and tasks != "":
+        abstracts= calc.parseTask(tasks)
+        return render_template('index.html', abstracts=abstracts)
+    return render_template('index.html')
 
 @app.route('/maps', methods=['GET', 'POST']) # show the main page
 def maps():

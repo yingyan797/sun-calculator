@@ -14,14 +14,14 @@ querySet = {
 }
 
 class Abstract:
-    def __init__(self):
-        self.queries = []
+    def __init__(self, taskDesc):
+        self.taskDesc = taskDesc
 
     def clear(self):
         self.queries = []
         self.angles = []
-        self.date, self.time, self.lat, self.lon, self.gmt = None, None, None, None, None
-        self.height, self.direction, self.altitude = None, None, None
+        self.gmt = 0
+        self.details = [None for i in range(10)]
 
     def queryReduce(self):
         qi = 0
@@ -29,54 +29,56 @@ class Abstract:
             q = self.queries[qi]
             if q <= 1 and len(self.angles) > 0:
                 self.queries.pop(qi)
-                self.height = self.angles.pop(0)
+                self.details[1] = self.angles.pop(0)
                 if q == 0:
-                    self.height *= -1
+                    self.details[1] *= -1
             elif q == 2 and len(self.angles) > 0:
                 self.queries.pop(qi)
-                self.direction = self.angles.pop(0)
-            elif q == 5 and self.lat == None:
+                self.details[2] = self.angles.pop(0)
+            elif q == 5 and self.details[6] == None:
                 self.queries.pop(qi)
-            elif q == 4 and self.date:
+            elif q == 4 and self.details[4]:
                 self.queries.pop(qi)
-            elif q == 3 and self.time:
+            elif q == 3 and self.details[3]:
                 self.queries.pop(qi)
             else:
                 qi += 1
 
     def formQuestion(self):
+        question = ""
         if self.queries == []:
-            return ""
+            question += "Sorry, I can't unserstand your question."
+            return question
         qs = ["What is the height angle of the sun (below horizon)?", "What is the height angle of the sun (above horizon)?", 
               "What is the direction of the sun (angle clockwise from North)?", "What time of the day is it when", 
               "Which date is it when", "What is the longitude of a location where", "What is the latitude of a location where", 
               "When does sunrise occur?", "When does sunset occur?", "What altitude of observation (in meters) is it where"]
-        question = qs[self.queries[0]]
+        question += qs[self.queries[0]]
         for qi in self.queries[1:]:
             question += "\nand\n"+qs[qi]
 
-        if self.height:
-            question += " the sun is at "+str(self.height)+" degree above horizon?"
-        if self.direction:
-            question += " the sun's direction is "+str(self.direction)+" degree clockwise from North?"
+        if self.details[1]:
+            question += " the sun is at "+str(self.details[1])+" degree above horizon?"
+        if self.details[2]:
+            question += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
         
         question += " Given that:\n"
-        if self.lat is not None:
-            question += "  At geographical location "+util.showLat(self.lat)
-        if self.lon is not None:
-            question += " "+util.showLon(self.lon)+"\n"
+        if self.details[6] is not None:
+            question += "  At geographical location "+util.showLat(self.details[6])
+        if self.details[5] is not None:
+            question += " "+util.showLon(self.details[5])+"\n"
         if self.gmt:
             question += "  Time zone is GMT"
             if self.gmt > 0:
                 question += '+'+str(self.gmt)+'\n'
             else:
                 question += str(self.gmt)+'\n'
-        if self.date:
-            question += "  On the date "+self.date.show()
-        if self.time:
-            question += "  At the time of "+self.time.show()
-        if self.altitude:
-            question += " Observing at an altitude of "+str(self.altitude)+" meters"
+        if self.details[4]:
+            question += "  On the date "+self.details[4].show()
+        if self.details[3]:
+            question += "  At the time of "+self.details[3].show()
+        if self.details[9]:
+            question += " Observing at an altitude of "+str(self.details[9])+" meters"
         
         return question
 
@@ -84,107 +86,75 @@ class Abstract:
         resp = 0  
     
     def show(self):
-        print("=====")
-        print("User asking for:", self.queries)
-        print("Angles provided:", self.angles)
-        print("Given condition:\n", "Lat", self.lat, "Lon", self.lon, "GMT", self.gmt, "Hgt:", self.height, "Drn:", self.direction)
-        if self.date:
-            print(" Date:",self.date.show())
-        else:
-            print("no date")
-        if self.time:
-            print(" Time",self.time.show())
-        else:
-            print("no time")
+        print(self.formQuestion())
 
 class Calculator:
-    def __init__(self, seps, ab):
+    def __init__(self, seps):
         self.seps = seps
         self.taskDesc = ""
-        self.abstract = ab
-
-    def prompt(self):
-        print("Hello earth scientist, I'm sun calculator.")
-
-        while True:
-            c = input("**Please type your questions in txt. Press -Enter- to submit, or use any key to skip and fill a form.")
-            if c == '':
-                f = open("question.txt", "r")
-                qi = 0
-                notUnderstand = []
-                while True:
-                    self.taskDesc = f.readline()
-                    if self.taskDesc == "":
-                        break
-                    qi += 1
-                    print("-Received question", qi, self.taskDesc)
-                    self.parseTask()
-                    # self.abstract.show()
-                    if self.abstract.queries != []:
-                        print("You are asking:")
-                        print(self.abstract.formQuestion())
-                        fb = input("Am I correct? Yes (y) No (Enter)\n--")
-                        if fb == 'y':
-                            print("Here's my calculation:")
-
-                    else:
-                        fb = input("Sorry, I cannot understand question "+str(qi)+". Press -Enter- to continue.")
-                        notUnderstand.append("question "+str(qi)+': '+self.taskDesc)
-                f.close()
-                print("Calculation finished. Here are the questions not able to understand.")
-                for nu in notUnderstand:
-                    print(nu)
-                fb = input("Would you like to write these questions and edit them to calculate again? --")
-                if fb == 'y':
-                    f = open("question.txt", "w")
-                    for nu in notUnderstand:
-                        f.write(nu+'\n')
-                    f.close()
-                else:
-                    return
-
-            else:
-                return
+        self.abstracts = []
     
-    def parseTask(self):
-        self.abstract.clear()
-        self.readProgress = 0
-        self.notMatchToken = ""
+    def parseTask(self, tasks):
+        ci = 0
+        self.abstracts = []
+        while True:
+            if ci < len(tasks):
+                c = tasks[ci]
+                
+                if c != '\n':
+                    self.taskDesc += c
+                    ci += 1
+                    continue
 
-        while self.readProgress < len(self.taskDesc):
-            date = self.parseDate()
-            if date:
-                self.abstract.date = date
-                continue
-            time = self.parseTime()
-            if time:
-                self.abstract.time= time
-                continue
-            lat, lon = self.parseLocation()
-            if lon is not None:
-                self.abstract.lat = lat
-                self.abstract.lon = lon
-                continue
-            gmt = self.parseGMT()
-            if gmt:
-                self.abstract.gmt = gmt
-                continue
-            
-            angle = self.parseAngle()
-            if angle:
-                self.abstract.angles.append(angle)
-                continue
+                while ci < len(tasks):
+                    if tasks[ci] == '\n':
+                        ci += 1
+                    else:
+                        break
 
-            query = self.parseQuery()
-            if query:
-                i = querySet[query]
-                if i not in self.abstract.queries:
-                    self.abstract.queries.append(i)
-
+            self.readProgress = 0
             self.notMatchToken = ""
-        # self.abstract.show()
-        self.abstract.queryReduce()
-        return self.abstract
+            ab = Abstract("Question "+str(len(self.abstracts)+1)+": "+self.taskDesc)
+            ab.clear()
+
+            while self.readProgress < len(self.taskDesc):
+                date = self.parseDate()
+                if date:
+                    ab.details[4] = date
+                    continue
+                time = self.parseTime()
+                if time:
+                    ab.details[3] = time
+                    continue
+                lat, lon = self.parseLocation()
+                if lon is not None:
+                    ab.details[6] = lat
+                    ab.details[5] = lon
+                    continue
+                gmt = self.parseGMT()
+                if gmt:
+                    ab.gmt = gmt
+                    continue
+                
+                angle = self.parseAngle()
+                if angle:
+                    ab.angles.append(angle)
+                    continue
+
+                query = self.parseQuery()
+                if query:
+                    i = querySet[query]
+                    if i not in ab.queries:
+                        ab.queries.append(i)
+
+                self.notMatchToken = ""
+
+            self.taskDesc = ""
+            ab.queryReduce()
+            self.abstracts.append(ab)
+            if ci >= len(tasks):
+                break
+        return self.abstracts
         
     def parseDate(self):
         t = self.notMatchToken
@@ -492,9 +462,8 @@ class Calculator:
         return self.taskDesc[self.readProgress-1]
        
 
-c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }", Abstract())
-# c.parseTask().show()
-# c.prompt()
+c = Calculator("~`!@#$%^&*()_-+={[]|\\:;<,>?/'\"\n }")
+c.parseTask("Abu dhabi sunset hour\nlondon sun height july 4")
 
 
 '''

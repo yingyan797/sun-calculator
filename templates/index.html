@@ -46,30 +46,33 @@
                     <p>If there is anything missing in your above descriptions, you can use this form to add information.
                         Note: if you ask multiple questions above, the detail you fill in will apply to ALL questions.
                     </p>
-                    <b>You are asking for:</b><br>
+                    <b>You are asking for (one or more):</b><br>
                     <label for="Sunrise">Sunrise</label>
                         <input type="checkbox" name="Sunrise">
-                    <label for="Sunset">Sunset</label>
+                    <label for="Sunset">; Sunset</label>
                         <input type="checkbox" name="Sunset">
-                    <label for="Height">Height</label>
+                    <label for="Height">; Height</label>
                         <input type="checkbox" name="Height">
-                    <label for="Direction">Direction</label>
+                    <label for="Direction">; Direction</label>
                         <input type="checkbox" name="Direction">
-                    <label for="Date">Date</label>
+                    <label for="Date">; Date</label>
                         <input type="checkbox" name="QDate">
-                    <label for="Time">Time</label>
+                    <label for="Time">; Time</label>
                         <input type="checkbox" name="QTime">
                     
-                    <br><br><b>Given conditions</b><br>
+                    <br><br><b>Given conditions (only fill in if needed)</b><br>
                     <label for="Longitude">Longitude:</label><input type="text" name="Longitude"></label> 
                         <label for="East">East</label><input type="radio" name="EW" value="East"><label for="West">West</label><input type="radio" name="EW" value="West"><br>
                     <label for="Latitude">Latitude:</label><input type="text" name="Latitude"></label>
                         <label for="North">North</label><input type="radio" name="NS" value="North"><label for="South">South</label><input type="radio" name="NS" value="South"><br>
                     <label for="Altitude">Altitude</label><input type="text" name="Altitude">
                     <label for="m">m</label><input type="radio" name="unit" value="m"><label for="km">km</label><input type="radio" name="unit" value="km"><br>
-                        <label for="Date">Date</label><input type="date" name="Date">
-                    <label for="Time">Time</label><input type="time" name="Time">
-                    <label for="GMT">GMT</label><input type="number" name="GMT"><br><br>    
+                    <label for="Month">Month</label><input type="number" max="12" name="Month">
+                    <label for="Day">Day</label><input type="number" max="31" name="Day"><br>
+                    <label for="Hour">Hour</label><input type="number" max="24" name="Hour">
+                    <label for="Minute">Minute</label><input type="number" max="59" name="Minute">
+                    <label for="Second">Second</label><input type="number" max="59" name="Second">
+                    <label for="GMT">GMT</label><input type="number" min="-12" max="12" name="GMT"><br><br>    
                     <button type="submit">Submit form>></button>
                 </div>
             </form>
@@ -78,8 +81,10 @@
         <div class="column">
             <div>
                 <h2>This is how we understand your questions</h2>
-                <p>You are asking...</p>
-                {{understand}}
+                {% for ab in abstracts %}
+                    <p>{{ab.taskDesc}}</p>
+                    <b>{{ab.formQuestion()}}</b>
+                {% endfor %}
             </div>
             <div>
                 <h2>Calculation result</h2>
