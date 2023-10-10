@@ -82,10 +82,15 @@
                 <h2>Confirm your question and start calculations</h2>
                 <button type="submit">Change and resubmit descriptions</button><br><br>
                 {% for ab in abstracts %}
-                    <b>Question {{ab.num}}</b>
+                    <b>Question {{ab.num}}</b><input type="submit" name="Reset{{ab.num}}" value="Resubmit description"><br>
                     <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea><br>
-                    You are asking: <b>{{ab.interpret}}</b><br>
-                    <label for="adding">Add details</label><input type="radio" name="adding" value="{{ab.num}}" form="details">
+                    You are asking:<br>
+                    <b>{{ab.interpret}}</b><br>
+                    Given details:<br>
+                    {% for cond in ab.conditions %}
+                        <b>--{{cond}}</b><br>
+                    {% endfor %}
+                    <br><label for="adding">Add details</label><input type="radio" name="adding" value="{{ab.num}}" form="details">
                     <button type="submit">Confirm and calculate</button>
                     <br><br>
                 {% endfor %}

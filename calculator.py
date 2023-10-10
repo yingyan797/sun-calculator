@@ -18,14 +18,16 @@ class Abstract:
         self.taskDesc = taskDesc
         self.num = num
         self.interpret = ""
+        self.conditions = []
+        self.given = []
         self.response = ""
 
     def clear(self):
         self.queries = []
         self.angles = []
-        self.gmt = 0
-        self.details = [None for i in range(10)]
+        self.details = [None for i in range(11)]
         self.interpret = ""
+        self.conditions = []
 
     def addDate(self, month, day):
         self.details[4] = Date(int(month), int(day))
@@ -33,7 +35,7 @@ class Abstract:
     def addTime(self, h, m, s):
         sec = 0
         day = 0
-        if s is not None and s != "":
+        if s:
             sec = s
         if h == 24:
             day = 1
@@ -43,7 +45,7 @@ class Abstract:
         self.details[9] = alt
         if not unit:
             unit = "m"
-        self.details[0] = unit   
+        self.details[10] = unit   
 
     def addLon(self, lon, ew):
         self.details[5] = util.toLonVal(lon, ew)
@@ -85,30 +87,36 @@ class Abstract:
               "When does sunrise occur?", "When does sunset occur?", "What altitude of observation (in meters) is it where"]
         self.interpret += qs[self.queries[0]]
         for qi in self.queries[1:]:
-            self.interpret += "\nand\n"+qs[qi]
+            self.interpret += "  "+qs[qi]
 
         if self.details[1]:
             self.interpret += " the sun is at "+str(self.details[1])+" degree above horizon?"
         if self.details[2]:
             self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
         
-        self.interpret += " Given that:\n"
-        if self.details[6] is not None:
-            self.interpret += "  At geographical location "+util.showLat(self.details[6])
-        if self.details[5] is not None:
-            self.interpret += " "+util.showLon(self.details[5])+"\n"
-        if self.gmt:
-            self.interpret += "  Time zone is GMT"
-            if self.gmt > 0:
-                self.interpret += '+'+str(self.gmt)+'\n'
-            else:
-                self.interpret += str(self.gmt)+'\n'
+        lat, lon = self.details[6], self.details[5]
+        if lat != None and lon != None:
+            self.conditions.append("At geographical coordinate: "+util.showLat(lat)+", "+util.showLon(lon))
+        else:
+            if lat != None:
+                self.conditions.append("At Latitude: "+util.showLat(lat))
+            elif lon != None:
+                self.conditions.append("At Longitude: "+util.showLon(lon))
+
         if self.details[4]:
-            self.interpret += "  On the date "+self.details[4].show()
+            self.conditions.append("On date: "+self.details[4].show())
         if self.details[3]:
-            self.interpret += "  At the time of "+self.details[3].show()
+            self.conditions.append("At local time: "+self.details[3].show())
+        if self.details[0]:
+            gmt = self.details[0]
+            c = "Time zone: GMT"
+            if gmt > 0:
+                c += '+'+str(gmt)
+            else:
+                c += str(gmt)
+            self.conditions.append(c)
         if self.details[9]:
-            self.interpret += " Observing at an altitude of "+str(self.details[9])+self.details[0]
+            self.conditions.append("Observing at altitude: "+str(self.details[9])+self.details[10])
         
 
     def formResponse(self):
@@ -169,7 +177,7 @@ class Calculator:
             
             gmt = self.parseGMT()
             if gmt:
-                ab.gmt = gmt
+                ab.details[0] = gmt
                 continue
             
             num, unit = self.parseAngleAltitude()

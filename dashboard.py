@@ -18,6 +18,7 @@ def index():
         emptyForm = True
         if calc.abstracts != [] and adding and adding != '':
             abf = calc.abstracts[int(adding)-1]
+            abf.conditions = []
         else:
             newForm = True
             abf = sc.Abstract("", 1)
@@ -35,44 +36,44 @@ def index():
 
         lon = request.form.get('Longitude') 
         ew = request.form.get('ew')
-        if lon and lon != '':
+        if lon:
             abf.addLon(float(lon), ew)
             emptyForm = False 
 
         lat = request.form.get('Latitude') 
         ns = request.form.get('ns')
-        if lat and lat != '':
+        if lat:
             abf.addLat(float(lat), ns)
             emptyForm = False 
         
         alt = request.form.get('Altitude')
         unit = request.form.get('unit')
-        if alt and alt != '':
+        if alt:
             abf.addAltitude(float(alt), unit)
             emptyForm = False 
 
         ds = ["Height", "Direction"]
         for i in range(2):
             v = request.form.get(ds[i])
-            if v is not None and v != '':
+            if v:
                 abf.details[i+1] = float(v)
                 emptyForm = False 
 
         gmt = request.form.get('GMT')
-        if gmt and gmt != '':
-            abf.gmt = int(gmt)
+        if gmt:
+            abf.details[0] = int(gmt)
             emptyForm = False 
 
         mo = request.form.get('Month')
         d = request.form.get('Day')
-        if mo and mo != '' and d and d != '':
+        if mo and d:
             abf.addDate(mo, d)
             emptyForm = False 
 
         h = request.form.get('Hour')
         mi = request.form.get('Minute')
         s = request.form.get('Second')
-        if h and h != '' and mi and mi != '':
+        if h and mi:
             abf.addTime(h, mi, s)
             emptyForm = False
 
@@ -85,9 +86,11 @@ def index():
     for abi in range(len(calc.abstracts)):
         ab = calc.abstracts[abi]
         td = request.form.get("Question"+str(ab.num))
-        if td is not None and td != ab.taskDesc:
+        rs = request.form.get("Reset"+str(ab.num))
+        if rs or td is not None and td != ab.taskDesc:
             calc.taskDesc = td
             calc.abstracts[abi] = calc.parseDesc(ab.num)
+
 
     return render_template('index.html', abstracts=calc.abstracts)
 
