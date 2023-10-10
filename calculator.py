@@ -27,6 +27,30 @@ class Abstract:
         self.details = [None for i in range(10)]
         self.interpret = ""
 
+    def addDate(self, month, day):
+        self.details[4] = Date(int(month), int(day))
+    
+    def addTime(self, h, m, s):
+        sec = 0
+        day = 0
+        if s is not None and s != "":
+            sec = s
+        if h == 24:
+            day = 1
+        self.details[3] = Time(int(h),int(m),int(sec),day)
+
+    def addAltitude(self, alt, unit):
+        self.details[9] = alt
+        if not unit:
+            unit = "m"
+        self.details[0] = unit   
+
+    def addLon(self, lon, ew):
+        self.details[5] = util.toLonVal(lon, ew)
+
+    def addLat(self, lat, ns):
+        self.details[6] = util.toLatVal(lat, ns)
+
     def queryReduce(self):
         qi = 0
         while qi < len(self.queries):
@@ -45,10 +69,13 @@ class Abstract:
                 self.queries.pop(qi)
             elif q == 3 and self.details[3]:
                 self.queries.pop(qi)
+            elif q == 9 and self.details[9]:
+                self.queries.pop(qi)
             else:
                 qi += 1
 
     def formQuestion(self):
+        self.interpret = ""
         if self.queries == []:
             self.interpret += "Sorry, I can't unserstand your question."
             return
@@ -146,7 +173,7 @@ class Calculator:
                 continue
             
             num, unit = self.parseAngleAltitude()
-            if num:
+            if num and num != '':
                 if unit != "deg":
                     ab.details[9] = num
                     ab.details[0] = unit

@@ -33,63 +33,60 @@
                 <button type="submit">Search</button>
             </form>
             <form action="/" method="post" id="questions">
-                <div>
-                    <h2>Describe all questions in words.</h2>
-                    <p>Write any number of questions, each one in a new line. Each question can contain multiple
-                        queries (E.g. sunrise and sunset, height and direction, etc.) if given same context.
-                    </p>
-                    <textarea name="taskDesc" rows="5" cols="85"></textarea><br><br>     
-                    <button type="submit">Submit question>></button>
-                </div>
-                <div>
-                    <h2>Alternatively, fill in question details.</h2>
-                    <p>If there is anything missing in your above descriptions, you can use this form to add information.
-                        Note: if you ask multiple questions above, the detail you fill in will apply to ALL questions.
-                    </p>
-                    <b>You are asking for (one or more):</b><br>
-                    <label for="Sunrise">Sunrise</label>
-                        <input type="checkbox" name="Sunrise">
-                    <label for="Sunset">; Sunset</label>
-                        <input type="checkbox" name="Sunset">
-                    <label for="Height">; Height</label>
-                        <input type="checkbox" name="Height">
-                    <label for="Direction">; Direction</label>
-                        <input type="checkbox" name="Direction">
-                    <label for="Date">; Date</label>
-                        <input type="checkbox" name="QDate">
-                    <label for="Time">; Time</label>
-                        <input type="checkbox" name="QTime">
-                    
-                    <br><br><b>Given conditions (only fill in if needed)</b><br>
-                    <label for="Longitude">Longitude:</label><input type="text" name="Longitude"></label> 
-                        <label for="East">East</label><input type="radio" name="EW" value="East"><label for="West">West</label><input type="radio" name="EW" value="West"><br>
-                    <label for="Latitude">Latitude:</label><input type="text" name="Latitude"></label>
-                        <label for="North">North</label><input type="radio" name="NS" value="North"><label for="South">South</label><input type="radio" name="NS" value="South"><br>
-                    <label for="Altitude">Altitude</label><input type="text" name="Altitude">
-                    <label for="m">m</label><input type="radio" name="unit" value="m"><label for="km">km</label><input type="radio" name="unit" value="km"><br>
-                    <label for="Month">Month</label><input type="number" max="12" name="Month">
-                    <label for="Day">Day</label><input type="number" max="31" name="Day"><br>
-                    <label for="Hour">Hour</label><input type="number" max="24" name="Hour">
-                    <label for="Minute">Minute</label><input type="number" max="59" name="Minute">
-                    <label for="Second">Second</label><input type="number" max="59" name="Second">
-                    <label for="GMT">GMT</label><input type="number" min="-12" max="12" name="GMT"><br><br>    
-                    <button type="submit">Submit form>></button>
-                </div>
+                <h2>Describe all questions in words.</h2>
+                <p>Write any number of questions, each one in a new line.
+                </p>
+                <textarea name="taskDesc" rows="5" cols="85"></textarea><br><br>     
+                <button type="submit">Submit question>></button>
+            </form>
+            <form action="/" method="post" id="details">
+                <h2>Alternatively, fill in question details.</h2>
+                <p>You can also add details using this form to any of your questions.</p>
+                <b>You are asking for (one or more):</b><br>
+                <label for="Sunrise">Sunrise</label>
+                    <input type="checkbox" name="Sunrise">
+                <label for="Sunset">; Sunset</label>
+                    <input type="checkbox" name="Sunset">
+                <label for="Height">; Sun Height</label>
+                    <input type="checkbox" name="QHeight">
+                <label for="Direction">; Sun Direction</label>
+                    <input type="checkbox" name="QDirection">
+                <label for="Date">; Date</label>
+                    <input type="checkbox" name="QDate">
+                <label for="Time">; Time</label>
+                    <input type="checkbox" name="QTime">
+                <label for="Lat">; Latitude</label>
+                    <input type="checkbox" name="QLat">
+                
+                <br><br><b>Given conditions (only fill in if needed)</b><br>
+                <label for="Longitude">Longitude:</label><input type="number" min="-180" max="180" name="Longitude"></label> 
+                    <label for="East">East</label><input type="radio" name="EW" value="East"><label for="West">West</label><input type="radio" name="EW" value="West">
+                <label for="Latitude">Latitude:</label><input type="number" min="-90" max="90" name="Latitude"></label>
+                    <label for="North">North</label><input type="radio" name="NS" value="North"><label for="South">South</label><input type="radio" name="NS" value="South"><br>
+                <label for="Altitude">Altitude</label><input type="number" min="0" name="Altitude">
+                <label for="m">m</label><input type="radio" name="unit" value="m"><label for="km">km</label><input type="radio" name="unit" value="km"><br>
+                <label for="Month">Date: Month</label><input type="number" min="1" max="12" name="Month">
+                <label for="Day">Day</label><input type="number" min="1" max="31" name="Day"><br>
+                <label for="Hour">Time: Hour</label><input type="number" min="0" max="24" name="Hour">
+                <label for="Minute">Minute</label><input type="number" min="0" max="59" name="Minute">
+                <label for="Second">Second</label><input type="number" min="0" max="59" name="Second">
+                <label for="GMT">GMT</label><input type="number" min="-12" max="12" name="GMT"><br>   
+                <label for="Height">Sun Height Angle</label><input type="number" min="-90" max="90" name="Height">
+                <label for="Direction">Sun Direction Angle</label><input type="number" min="0" max="360" name="Direction"><br><br>
+                <button type="submit">Submit form>></button>
             </form>
 
         </div>
         <div class="column">
             <form action="/" method="post">
-                <h2>Question confirmation and result</h2>
+                <h2>Confirm your question and start calculations</h2>
                 <button type="submit">Change descriptions</button><br><br>
                 {% for ab in abstracts %}
                     <b>Question {{ab.num}}</b>
-                    <label for="adding">Add details</label><input type="radio" name="adding" form="questions">
+                    <label for="adding">Add details</label><input type="radio" name="adding" value="{{ab.num}}" form="details">
                     <button type="submit">Confirm and calculate</button><br>
                     <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea>
-                    You are asking:
                     <b>{{ab.interpret}}</b><br><br>
-                        
                 {% endfor %}
             </form>
         </div>
