@@ -59,20 +59,20 @@
                     <input type="checkbox" name="QLat">
                 
                 <br><br><b>Given conditions (only fill in if needed)</b><br>
-                <label for="Longitude">Longitude:</label><input type="number" min="-180" max="180" name="Longitude"></label> 
-                    <label for="East">East</label><input type="radio" name="EW" value="East"><label for="West">West</label><input type="radio" name="EW" value="West">
-                <label for="Latitude">Latitude:</label><input type="number" min="-90" max="90" name="Latitude"></label>
-                    <label for="North">North</label><input type="radio" name="NS" value="North"><label for="South">South</label><input type="radio" name="NS" value="South"><br>
-                <label for="Altitude">Altitude</label><input type="number" min="0" name="Altitude">
+                <label for="Longitude">Longitude: </label><input type="number" min="-180" max="180" name="Longitude"></label> 
+                    <label for="East">East</label><input type="radio" name="EW" value="East"><label for="West">;West</label><input type="radio" name="EW" value="West">
+                <label for="Latitude"> Latitude: </label><input type="number" min="-90" max="90" name="Latitude"></label>
+                    <label for="North">North</label><input type="radio" name="NS" value="North"><label for="South">;South</label><input type="radio" name="NS" value="South"><br>
+                <label for="Altitude">Altitude: </label><input type="number" min="0" name="Altitude">
                 <label for="m">m</label><input type="radio" name="unit" value="m"><label for="km">km</label><input type="radio" name="unit" value="km"><br>
-                <label for="Month">Date: Month</label><input type="number" min="1" max="12" name="Month">
-                <label for="Day">Day</label><input type="number" min="1" max="31" name="Day"><br>
-                <label for="Hour">Time: Hour</label><input type="number" min="0" max="24" name="Hour">
-                <label for="Minute">Minute</label><input type="number" min="0" max="59" name="Minute">
-                <label for="Second">Second</label><input type="number" min="0" max="59" name="Second">
-                <label for="GMT">GMT</label><input type="number" min="-12" max="12" name="GMT"><br>   
-                <label for="Height">Sun Height Angle</label><input type="number" min="-90" max="90" name="Height">
-                <label for="Direction">Sun Direction Angle</label><input type="number" min="0" max="360" name="Direction"><br><br>
+                <label for="Month">Date: Month </label><input type="number" min="1" max="12" name="Month">
+                <label for="Day">Day </label><input type="number" min="1" max="31" name="Day"><br>
+                Local Time <input type="number" min="0" max="24" name="Hour">
+                : <input type="number" min="0" max="59" name="Minute">
+                : <input type="number" min="0" max="59" name="Second">
+                <label for="GMT">Time Zone GMT </label><input type="number" min="-12" max="12" name="GMT"><br>   
+                <label for="Height">Sun Height Angle: </label><input type="number" min="-90" max="90" name="Height">
+                <label for="Direction">Sun Direction Angle: </label><input type="number" min="0" max="360" name="Direction"><br><br>
                 <button type="submit">Submit form>></button>
             </form>
 
@@ -80,13 +80,14 @@
         <div class="column">
             <form action="/" method="post">
                 <h2>Confirm your question and start calculations</h2>
-                <button type="submit">Change descriptions</button><br><br>
+                <button type="submit">Change and resubmit descriptions</button><br><br>
                 {% for ab in abstracts %}
                     <b>Question {{ab.num}}</b>
+                    <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea><br>
+                    You are asking: <b>{{ab.interpret}}</b><br>
                     <label for="adding">Add details</label><input type="radio" name="adding" value="{{ab.num}}" form="details">
-                    <button type="submit">Confirm and calculate</button><br>
-                    <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea>
-                    <b>{{ab.interpret}}</b><br><br>
+                    <button type="submit">Confirm and calculate</button>
+                    <br><br>
                 {% endfor %}
             </form>
         </div>
