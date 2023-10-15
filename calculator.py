@@ -15,7 +15,7 @@ querySet = {
     "altitude": 9, "elavation": 9
 }
 
-fields = ["GMT", "Sun height angle", "Sun direction angle", "Local time(s)", 
+fields = ["Time zone", "Sun height angle", "Sun direction angle", "Local time(s)", 
           "Date(s)", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation"]
 
 sunriseset = [(st.sunTimes, [6,5,0,4]), (st.sunTimeAltitude, [6,5,0,4,9])]
@@ -164,13 +164,15 @@ class Abstract:
                 r,m = checkAnswer(answerMap[2])
                 if q1:
                     qtemp.append(1)
-                    res += [r[0], r[1]]
-                else:
-                    res.append(r[1]) 
-                missing.append(m)
-                if q1:
                     missing.append(m)
+                    if r:
+                        res.append(r[0])
+                    else:
+                        res += [None, None]
                 qtemp.append(2)
+                missing.append(m)
+                if r:
+                    res.append(r[1])
                 q1 = False
             elif q in [7,8]:
                 if len(temp78) < 1:
@@ -201,16 +203,18 @@ class Abstract:
         for i in range(len(qtemp)):
             info = ""
             if res[i] is not None:
-                info = fields[qtemp[i]]+res[i]
+                info = fields[qtemp[i]]+": "+res[i]+'\n'
             if missing[i] is not None:
-                info = "Calculating: "+fields[qtemp[i]]+"  **Missing Information: "
+                info = "Calculating: "+fields[qtemp[i]]+"--\n**The following information is missing: \n  <Case 1>"
+                c = 1
                 for m in missing[i][0]:
-                    info += fields[m]+", "
+                    info += ", "+fields[m]
                 for ms in missing[i][1:]:
-                    info += " //Or: "
+                    c += 1
+                    info += "\n  <Case "+str(c)+'>'
                     for m in ms:
-                        info += fields[m]+", "
-            self.response.append(info)
+                        info += ", "+fields[m]
+            self.response.append(info+'\n')
         # for qt in qtemp:
         #     self.response.append(fields[qt]+res[qt])
 

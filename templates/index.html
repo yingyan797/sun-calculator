@@ -79,23 +79,22 @@
         </div>
         <div class="column">
             <form action="/" method="post">
-                <h2>Confirm your question and start calculations</h2>
-                <button type="submit">Change and resubmit descriptions</button><br><br>
+                <h2>Confirm questions and calculate results
+                <button type="submit">Refresh All</button></h2>
                 {% for ab in abstracts %}
-                    <b>Question {{ab.num}}</b><input type="submit" name="Reset{{ab.num}}" value="Resubmit description"><br>
-                    <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea><br>
-                    You are asking:<br>
+                    <h3>Question {{ab.num}}
+                    <input type="submit" name="Reset{{ab.num}}" value="Resubmit"></h3> 
+                    <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea>
+                    <br>You ask:
                     <b>{{ab.interpret}}</b><br>
                     Given details:<br>
                     {% for cond in ab.conditions %}
                         <b>--{{cond}}</b><br>
                     {% endfor %}
-                    <br><label for="adding">Add details</label><input type="radio" name="adding" value="{{ab.num}}" form="details">
-                    <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate">
-                    <br>
-                    {% for resp in ab.response %}
-                        <b>{{resp}}</b><br>
-                    {% endfor %}
+                    <input type="radio" name="adding" value="{{ab.num}}" form="details">                   
+                    <label for="adding">Use the form to add details</label>
+                    <br><br>If the question is correct, <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate"><br>
+                    <textarea readonly rows="5", cols="90">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea>
                     <br><br>
                 {% endfor %}
             </form>
