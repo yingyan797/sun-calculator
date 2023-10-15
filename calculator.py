@@ -18,6 +18,10 @@ querySet = {
 fields = ["Time zone", "Sun height angle", "Sun direction angle", "Local time(s)", 
           "Date(s)", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation"]
 
+degs = ["degree", "deg", "d"]
+ms = ["m", "meter", "meters", "metre", "metres"]
+kms = ["km", "kilometer", "kilometers", "kilometre", "kilometres"]
+
 sunriseset = [(st.sunTimes, [6,5,0,4]), (st.sunTimeAltitude, [6,5,0,4,9])]
 
 answerMap = {
@@ -276,10 +280,11 @@ class Calculator:
                 continue
             
             num, unit = self.parseAngleAltitude()
+            print(num, unit)
             if num and num != '':
                 if unit != "deg":
                     ab.details[9] = num
-                    ab.details[0] = unit
+                    ab.details[10] = unit
                 else:
                     ab.angles.append(num)
                 continue
@@ -394,6 +399,15 @@ class Calculator:
                         fromMinute = t[2:4]
                         if len(t) == 6 and int(t[4:]) < 60:
                             fromSecond = t[4:]
+                        prg = self.readProgress
+                        t0 = t
+                        t = self.readToken()
+                        if t in ms+kms+degs:
+                            self.notMatchToken = t0
+                            self.readProgress = prg
+                            return None
+                        self.readProgress = prg
+                        t = t0
             
             elif len(t) <= 2 and self.precSymbol() in seps :
                 prg = self.readProgress
@@ -544,9 +558,6 @@ class Calculator:
         return None
             
     def mapUnit(tok):
-        degs = ["degree", "deg", "d"]
-        ms = ["m", "meter", "meters", "metre", "metres"]
-        kms = ["km", "kilometer", "kilometers", "kilometre", "kilometres"]
         if tok in degs:
             return "deg"
         elif tok in ms:

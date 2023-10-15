@@ -26,7 +26,7 @@
 
 <body  style="background-image: url('../static/Image/yearth.png');">
     <!-- style="background-image: url('../static/Image/yearth.png');" -->
-    <h1 align="center">Y-EARTH | Sun Calculator 太阳时空信息计算器</h1>
+    <h1 align="center">Y-EARTH | Interactive Sun Calculator 交互式太阳时空信息计算器</h1>
     <div class="row">
         <div class="column" style="background-color:lightgoldenrodyellow;">
             <form action="/information" method="post" target="_blank">
@@ -41,14 +41,13 @@
             </form>
             <form action="/" method="post" id="questions">
                 <h2>Describe all questions in words.</h2>
-                <p>Write any number of questions, each one in a new line.
-                </p>
+                <p>What would you like to calculate? Write any number of questions, each one in a new line.</p>
                 <textarea name="taskDesc" rows="8" cols="85"></textarea><br><br>     
                 <button type="submit">Summarize questions>></button>
             </form>
             <form action="/" method="post" id="details">
                 <h2>Alternatively, fill in question details.</h2>
-                <p>You can also add details using this form to any of your questions.</p>
+                <p>You can also use this form to add more details to question summary.</p>
                 <b>You are asking for (one or more):</b><br>
                 <label for="Sunrise">Sunrise</label>
                     <input type="checkbox" name="Sunrise">
