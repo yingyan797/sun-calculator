@@ -15,8 +15,8 @@ querySet = {
     "altitude": 9, "elavation": 9
 }
 
-fields = ["Time zone GMT: ", "Sun height angle: ", "Sun direction angle: ", "At Time(s) of--", 
-          "On Date(s) of--", "Longitude: ", "Latitude: ", "Sunrise time: ", "Sunset time: ", "Observing at altitude: "]
+fields = ["GMT", "Sun height angle", "Sun direction angle", "Local time(s)", 
+          "Date(s)", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation"]
 
 sunriseset = [(st.sunTimes, [6,5,0,4]), (st.sunTimeAltitude, [6,5,0,4,9])]
 
@@ -110,29 +110,28 @@ class Abstract:
             self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
         
         lat, lon = self.details[6], self.details[5]
-        cs = []
         if lat != None and lon != None:
             self.conditions.append("At geographical coordinate: "+util.showLat(lat)+", "+util.showLon(lon))
         else:
             if lat != None:
-                self.conditions.append(fields[6]+util.showLat(lat))
+                self.conditions.append(fields[6]+": "+util.showLat(lat))
             elif lon != None:
-                self.conditions.append(fields[5]+util.showLon(lon))
+                self.conditions.append(fields[5]+": "+util.showLon(lon))
         
         if self.details[4]:
-            self.conditions.append(fields[4]+self.details[4].show())
+            self.conditions.append(fields[4]+": "+self.details[4].show())
         if self.details[3]:
-            self.conditions.append(fields[3]+self.details[3].show())
+            self.conditions.append(fields[3]+": "+self.details[3].show())
         if self.details[0]:
             gmt = self.details[0]
-            c = fields[0]
+            c = "Time zone: GMT"
             if gmt > 0:
                 c += '+'+str(gmt)
             else:
                 c += str(gmt)
             self.conditions.append(c)
         if self.details[9]:
-            self.conditions.append(fields[9]+str(self.details[9])+self.details[10])
+            self.conditions.append(fields[9]+": "+str(self.details[9])+self.details[10])
     
     def formResponse(self):
         self.response = []
@@ -204,13 +203,13 @@ class Abstract:
             if res[i] is not None:
                 info = fields[qtemp[i]]+res[i]
             if missing[i] is not None:
-                info = "Calculating "+fields[qtemp[i]]+"Missing Information: "
+                info = "Calculating: "+fields[qtemp[i]]+"  **Missing Information: "
                 for m in missing[i][0]:
-                    info += fields[m]
+                    info += fields[m]+", "
                 for ms in missing[i][1:]:
-                    info += "; Or: "
+                    info += " //Or: "
                     for m in ms:
-                        info += fields[m]
+                        info += fields[m]+", "
             self.response.append(info)
         # for qt in qtemp:
         #     self.response.append(fields[qt]+res[qt])
