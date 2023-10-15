@@ -1,9 +1,10 @@
 <head>
     <title>Maps search</title>
-    <meta http-equiv = "refresh" content = "1; url = {{url}}" />
+    <!-- <meta http-equiv = "refresh" content = "1; url = {{url}}" /> -->
 </head>
 <body>
-    <p>Searching "{{location}}"" on maps...</p>
-    <img src="yearth.png" alt="sun calculator" height="50%" width="50%"/>
+    <p>Searching the following location on maps: </p>
+    <h2>{{location}}</h2>
+    <img src="{{url_for('static', filename='Image/yearth.png')}}" alt="sun" height="70%">
 </body>
 

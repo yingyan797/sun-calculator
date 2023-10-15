@@ -20,13 +20,15 @@
       display: table;
       clear: both;
     }
+
     </style>
 </head>
 
-<body>
-    <h1>Y-EARTH Sun Calculator</h1>
+<body  style="background-image: url('../static/Image/yearth.png');">
+    <!-- style="background-image: url('../static/Image/yearth.png');" -->
+    <h1>[Y-EARTH] Sun Calculator</h1>
     <div class="row">
-        <div class="column">
+        <div class="column" style="background-color:lightgoldenrodyellow;">
             <form action="/maps" method="post" target="_blank">
                 <b><label for="location">Find location on maps</label></b>
                 <input type="text" name="location">
@@ -77,10 +79,11 @@
             </form>
 
         </div>
-        <div class="column">
+        <div class="column" style="background-color: lightgoldenrodyellow;">
             <form action="/" method="post">
                 <h2>Confirm questions and calculate results
                 <button type="submit">Refresh All</button></h2>
+
                 {% for ab in abstracts %}
                     <h3>Question {{ab.num}}
                     <input type="submit" name="Reset{{ab.num}}" value="Resubmit"></h3> 

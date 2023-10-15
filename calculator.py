@@ -122,7 +122,7 @@ class Abstract:
             self.conditions.append(fields[4]+": "+self.details[4].show())
         if self.details[3]:
             self.conditions.append(fields[3]+": "+self.details[3].show())
-        if self.details[0]:
+        if self.details[0] is not None:
             gmt = self.details[0]
             c = "Time zone: GMT"
             if gmt > 0:
@@ -203,9 +203,9 @@ class Abstract:
         for i in range(len(qtemp)):
             info = ""
             if res[i] is not None:
-                info = fields[qtemp[i]]+": "+res[i]+'\n'
+                info = fields[qtemp[i]]+": "+str(res[i])+'\n'
             if missing[i] is not None:
-                info = "Calculating: "+fields[qtemp[i]]+"--\n**The following information is missing: \n  <Case 1>"
+                info = "Calculating: "+fields[qtemp[i]]+"; **The following information is missing: \n  <Case 1>"
                 c = 1
                 for m in missing[i][0]:
                     info += ", "+fields[m]
@@ -270,9 +270,8 @@ class Calculator:
                 ab.details[6] = lat
                 ab.details[5] = lon
                 continue
-            
             gmt = self.parseGMT()
-            if gmt:
+            if gmt is not None:
                 ab.details[0] = gmt
                 continue
             
@@ -378,6 +377,8 @@ class Calculator:
         day = 0
         noon = ""
         seps = ":_/\\"
+        ams = ["pm", 'p.m.', "p.m", "am."]
+        pms = ["am", "a.m.", "a.m", "am."]
 
         t = self.notMatchToken
         if t == "":
@@ -405,23 +406,25 @@ class Calculator:
                             t = self.readToken()
                             if t.isnumeric() and int(t) < 60:
                                 fromSecond = t
-                            else:
-                                noon = t
 
                     else:
                         t = fromHour
                         self.readProgress = prg
 
         if fromHour != "" and fromMinute != "":
-            self.notMatchToken = ""
-            if noon == "":
-                t = self.readToken()
-                noon = t
+            if fromSecond != "":
+               t = self.readToken() 
             fac = 0
-            if noon in ["pm", 'p.m.', "p.m", "am."] and int(fromHour) in range(1, 12):
-                fac = 1
-            elif noon in ["am", "a.m.", "a.m", "am."] and int(fromHour) == 12:
-                fac = -1
+            if t in ams:
+                self.notMatchToken = ""
+                if int(fromHour) in range(1, 12):
+                    fac = 1
+            elif t in pms:
+                self.notMatchToken = ""
+                if int(fromHour) == 12:
+                    fac = -1
+            else:
+                self.notMatchToken = t
 
             return Time(int(fromHour)+fac*12, int(fromMinute), int(fromSecond), day)
         
@@ -461,6 +464,8 @@ class Calculator:
                     d = 'w'
                 else:
                     self.readProgress = prg
+                    t = self.notMatchToken
+                    return ("",'')
 
             if loc[0] != '-' and d != '':
                 if d == 's':
@@ -607,19 +612,24 @@ class Calculator:
        
 
 # c = Calculator("~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n }")
-# c.parseTask("Abu dhabi sunset hour\nlondon sun height july 4")
+# c.parseTask("which date london 51n 0.1w sun height is 30 degree at 15:00 gmt +1")
+# for ab in c.abstracts:
+#     print(ab.interpret)
+#     print(ab.conditions)
+
+# print(util.findFloat("30.5.5ks ndf"))
 # print(util.findFloat("0.-2e2.5e25"))
 # print("-3".isnumeric())
-ab = Abstract("", 1)
-ab.clear()
-ab.details[6] = 35
-ab.details[5] = 120
-ab.details[0] = 8
-ab.details[3] = Time(12,0,0,0)
-ab.details[4] = Date(6,22)
-ab.queries = [3]
-ab.formResponse()
-print(ab.response)
+# ab = Abstract("", 1)
+# ab.clear()
+# ab.details[6] = 35
+# ab.details[5] = 120
+# ab.details[0] = 8
+# ab.details[3] = Time(12,0,0,0)
+# ab.details[4] = Date(6,22)
+# ab.queries = [3]
+# ab.formResponse()
+# print(ab.response)
 
 '''
 calculate the sunset hour of london 51N 0.1E gmt+1 on june 25
