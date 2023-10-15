@@ -36,7 +36,7 @@
                 <h2>Describe all questions in words.</h2>
                 <p>Write any number of questions, each one in a new line.
                 </p>
-                <textarea name="taskDesc" rows="5" cols="85"></textarea><br><br>     
+                <textarea name="taskDesc" rows="8" cols="85"></textarea><br><br>     
                 <button type="submit">Submit question>></button>
             </form>
             <form action="/" method="post" id="details">
@@ -91,7 +91,9 @@
                         <b>--{{cond}}</b><br>
                     {% endfor %}
                     <br><label for="adding">Add details</label><input type="radio" name="adding" value="{{ab.num}}" form="details">
-                    <button type="submit">Confirm and calculate</button>
+                    <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate">
+                    <br>
+                    {{ab.response}}
                     <br><br>
                 {% endfor %}
             </form>

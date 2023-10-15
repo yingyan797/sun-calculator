@@ -17,10 +17,11 @@ def dayLength(date, lat):
     return (daytimeBalance(date, lat) * 2 + 180) / 360 * dsecs
 
 # Main formula to calculate sunrise&sunset times
-def sunTimes(lat, lon, gmt, date):
-    hdl = dayLength(date, lat)/2
-    noon = noonSecs(gmt, lon)
-    return secondsToTime(noon-hdl), secondsToTime(noon+hdl)
+def sunTimes(args):
+    # lat, lon, gmt, date
+    hdl = dayLength(args[3], args[0])/2
+    noon = noonSecs(args[2], args[1])
+    return secondsToTime(noon-hdl).show(), secondsToTime(noon+hdl).show()
 
 # Display calculation result
 def calcSun(lat, lon, gmt, date):
@@ -40,7 +41,8 @@ def calcSun(lat, lon, gmt, date):
           +"Sunrise: "+sr.show()+"\n"
           +"Sunset:  "+ss.show())
 
-def sunTimeAltitude(lat, lon, gmt, date, alt):
-    return sunHeightTimeLim(lat, lon, gmt, date, horizonAngle(alt))
+def sunTimeAltitude(args):
+    # lat, lon, gmt, date, alt
+    return sunHeightTimeLim([args[0], args[1], args[2], args[3], horizonAngle(args[4])])
 
 

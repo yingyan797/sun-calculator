@@ -1,5 +1,5 @@
 from sunTime import sunTimes, calcSun, sunTimeAltitude
-from sunPosition import sunTimePosition, sunHeightTimeLim, sunDirectionTimeLim
+from sunPosition import sunPosition, sunHeightTimeLim, sunDirectionTimeLim
 from dateTime import Date, Time
 
 def timeTests():
@@ -11,22 +11,22 @@ def timeTests():
     calcSun(39.2, 112, 8, Date(7,24))
 
 def posTest():
-    print(sunTimePosition(31.23, 121.48, 8, Date(8,24), Time(10, 0, 0, 0)))
+    print(sunPosition(31.23, 121.48, 8, Date(8,24), Time(10, 0, 0, 0)))
 
 def posTime():
     for h in range(12,15):
         for m in range(60):
           time = Time(h,m,0,0)
-          print(time.show(),"--",sunTimePosition(51, 0, 1, Date(6,22), time))
+          print(time.show(),"--",sunPosition(51, 0, 1, Date(6,22), time))
 
 def posDate():
     for d in range(30):
         date = Date(6, d)
-        print(date.show(),"--",sunTimePosition(51, 0, 1, date, Time(15,0,0,0)))
+        print(date.show(),"--",sunPosition(51, 0, 1, date, Time(15,0,0,0)))
 
 def posLocation():
     for lat in range(55):
-        print(lat,"N,",0," -- ",sunTimePosition(lat, 0, 1, Date(6,22), Time(15,0,0,0)))
+        print(lat,"N,",0," -- ",sunPosition(lat, 0, 1, Date(6,22), Time(15,0,0,0)))
         
 def timeHeightLimitTest():
     t1, t2 = sunHeightTimeLim(39.5, 113.5, 8, Date(7,21), 30)

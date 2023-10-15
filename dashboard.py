@@ -90,7 +90,8 @@ def index():
         if rs or td is not None and td != ab.taskDesc:
             calc.taskDesc = td
             calc.abstracts[abi] = calc.parseDesc(ab.num)
-
+        elif request.form.get("Calculate"+str(ab.num)):
+            calc.abstracts[abi].formResponse()
 
     return render_template('index.html', abstracts=calc.abstracts)
 

@@ -1,4 +1,6 @@
 from dateTime import Date, Time
+import sunTime as st
+import sunPosition as sp
 import util
 
 months = {
@@ -13,6 +15,15 @@ querySet = {
     "altitude": 9, "elavation": 9
 }
 
+sunriseset = [(st.sunTimes, [6,5,0,4]), (st.sunTimeAltitude, [6,5,0,4,9])]
+
+answerMap = {
+    1: [(sp.sunHeight, [6,5,0,4,3])], 2: [(sp.sunPosition, [6,5,0,4,3])], 
+    3: [(sp.sunHeightTimeLim, [6,5,0,4,1]), (sp.sunDirectionTimeLim, [6,5,0,4,2])],
+    4: [(sp.sunDateLim, [6,5,0,3,1]), (sp.sunDateLim, [6,5,0,3,2])],
+    7: sunriseset, 8: sunriseset
+}
+
 class Abstract:
     def __init__(self, taskDesc, num):
         self.taskDesc = taskDesc
@@ -20,7 +31,7 @@ class Abstract:
         self.interpret = ""
         self.conditions = []
         self.given = []
-        self.response = ""
+        self.response = None
 
     def clear(self):
         self.queries = []
@@ -28,6 +39,7 @@ class Abstract:
         self.details = [None for i in range(11)]
         self.interpret = ""
         self.conditions = []
+        self.response = None
 
     def addDate(self, month, day):
         self.details[4] = Date(int(month), int(day))
@@ -117,11 +129,83 @@ class Abstract:
             self.conditions.append(c)
         if self.details[9]:
             self.conditions.append("Observing at altitude: "+str(self.details[9])+self.details[10])
-        
-
-    def formResponse(self):
-        resp = 0  
     
+    def formResponse(self):
+        self.response = None
+        def checkAnswer(maps):
+            missing = []
+            for m in maps:
+                mg = []
+                for cond in m[1]:
+                    if not self.details[cond]:
+                        mg.append(cond)
+                if mg != []:
+                    missing.append(mg)
+                else:
+                    args = [self.details[cond] for cond in m[1]]
+                    if m[0] == sp.sunDateLim:
+                        hod = False
+                        if m[1][-1] == 1:
+                            hod = True
+                        args.append(hod)
+                    return m[0](args), None
+            return None,missing
+        
+        res = []
+        res78 = []
+        missing = []
+        qtemp = []
+        q1 = False
+        temp78 = []
+        miss78 = None
+        for q in self.queries:
+            if q == 1:
+                q1 = True
+            elif q == 2:
+                r,m = checkAnswer(answerMap[2])
+                if r:
+                    if q1:
+                        qtemp.append(1)
+                        res += [r[0], r[1]]
+                    else:
+                        res.append(r[1]) 
+                else:
+                    missing.append(m)
+                    if q1:
+                        missing.append(m)
+                qtemp.append(2)
+                q1 = False
+            elif q in [7,8]:
+                if len(temp78) < 1:
+                    r,miss78 = checkAnswer(answerMap[7])
+                    if r:
+                        res78 += [r[0], r[1]]
+                temp78.append(q)
+            
+            elif q in answerMap:
+                maps = answerMap[q]
+                qtemp.append(q)
+                r, m = checkAnswer(maps)
+                if r:
+                    res.append(r)
+                else:
+                    missing.append(m)
+
+        if q1:
+            qtemp.append(1)
+            r,m = checkAnswer(answerMap[1])
+            if r:
+                res.append(r) 
+            else:
+                missing.append(m)
+        qtemp += temp78
+        for i in temp78:
+            res.append(res78[i-7])
+            if not miss78 is None:
+                missing.append(miss78)
+        
+        self.response = len(qtemp), qtemp, res, missing
+
     def show(self):
         print(self.formQuestion())
 
@@ -170,6 +254,7 @@ class Calculator:
                 ab.details[3] = time
                 continue
             lat, lon = self.parseLocation()
+            print("loc",lat, lon)
             if lon is not None:
                 ab.details[6] = lat
                 ab.details[5] = lon
@@ -384,19 +469,21 @@ class Calculator:
             t = self.readToken()
             loc2 = toCoord(t)
 
-            if loc2 == ("", '') and loc1[1] != '':
-                self.readProgress = prg
-                self.notMatchToken = t0
-                return (None, float(loc1[0]))
-            else:
-                t = t0
-                self.readProgress = prg
+            if loc1[1] != '':  
+                if loc2 == ("", ''):
+                    self.readProgress = prg
+                    self.notMatchToken = t0
+                    return (None, float(loc1[0]))
+            # else:
+            #     t = t0
+            #     self.readProgress = prg
 
         if loc2 == ("", ''):
             self.notMatchToken = t
             return (None, None)
         
         self.notMatchToken = ""
+        print("nmt",self.taskDesc[self.readProgress:])
         if loc1[1] == 'e':
             return (float(loc2[0]), float(loc1[0]))
         return (float(loc1[0]), float(loc2[0]))
@@ -408,8 +495,10 @@ class Calculator:
         
         gmt = 0
         if t in ["gmt", "utc"]:
-            sym = self.precSymbol()
             t = self.readToken()
+            sym = t[0]
+            if sym == '-':
+                t = t[1:]
             if t.isnumeric():
                 gmt = int(t)
                 if sym == '-':
@@ -510,7 +599,17 @@ class Calculator:
 # c = Calculator("~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n }")
 # c.parseTask("Abu dhabi sunset hour\nlondon sun height july 4")
 # print(util.findFloat("0.-2e2.5e25"))
-# print(float("-.25"))
+# print("-3".isnumeric())
+# ab = Abstract("", 1)
+# ab.clear()
+# ab.details[6] = 35
+# ab.details[5] = 120
+# ab.details[0] = 8
+# ab.details[3] = Time(12,0,0,0)
+# ab.details[4] = Date(6,22)
+# ab.queries = [3,4]
+# ab.formResponse()
+# print(ab.response)
 
 '''
 calculate the sunset hour of london 51N 0.1E gmt+1 on june 25
