@@ -98,7 +98,14 @@ def index():
 @app.route('/maps', methods=['GET', 'POST']) # show the main page
 def maps():
     loc = request.form.get('location')
-    return render_template('maps.html', location = loc, url="https://google.com/maps/place/"+loc)
+    place = request.form.get('place')
+    if place and place != "":
+        loc = place
+    return render_template('maps.html', location = loc)
+
+@app.route('/information', methods=['GET', 'POST']) # show the main page
+def infomation():
+    return render_template('info.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5005, debug=True)

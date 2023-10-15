@@ -26,11 +26,16 @@
 
 <body  style="background-image: url('../static/Image/yearth.png');">
     <!-- style="background-image: url('../static/Image/yearth.png');" -->
-    <h1>[Y-EARTH] Sun Calculator</h1>
+    <h1 align="center">Y-EARTH | Sun Calculator 太阳时空信息计算器</h1>
     <div class="row">
         <div class="column" style="background-color:lightgoldenrodyellow;">
+            <form action="/information" method="post" target="_blank">
+                <input type="submit" name="help" value="User guide">
+                <input type="submit" name="info" value="More information">
+                <input type="submit" name="contact" value="Contact us">
+            </form> 
             <form action="/maps" method="post" target="_blank">
-                <b><label for="location">Find location on maps</label></b>
+                <b><label for="location">Find geographical information of a place</label></b>
                 <input type="text" name="location">
                 <button type="submit">Search</button>
             </form>
@@ -39,7 +44,7 @@
                 <p>Write any number of questions, each one in a new line.
                 </p>
                 <textarea name="taskDesc" rows="8" cols="85"></textarea><br><br>     
-                <button type="submit">Submit question>></button>
+                <button type="submit">Summarize questions>></button>
             </form>
             <form action="/" method="post" id="details">
                 <h2>Alternatively, fill in question details.</h2>
@@ -81,7 +86,7 @@
         </div>
         <div class="column" style="background-color: lightgoldenrodyellow;">
             <form action="/" method="post">
-                <h2>Confirm questions and calculate results
+                <h2>Question summary and calculation
                 <button type="submit">Refresh All</button></h2>
 
                 {% for ab in abstracts %}
@@ -95,8 +100,8 @@
                         <b>--{{cond}}</b><br>
                     {% endfor %}
                     <input type="radio" name="adding" value="{{ab.num}}" form="details">                   
-                    <label for="adding">Use the form to add details</label>
-                    <br><br>If the question is correct, <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate"><br>
+                    <label for="adding">Add more details using the form</label>
+                    <br><br>If the summary is correct, <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate"><br>
                     <textarea readonly rows="5", cols="90">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea>
                     <br><br>
                 {% endfor %}

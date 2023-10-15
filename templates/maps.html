@@ -1,10 +1,15 @@
 <head>
-    <title>Maps search</title>
-    <!-- <meta http-equiv = "refresh" content = "1; url = {{url}}" /> -->
+    <title>Location</title>
 </head>
 <body>
-    <p>Searching the following location on maps: </p>
-    <h2>{{location}}</h2>
+    <h1 style="background-color: aqua;">Geolographical information finder</h1>
+    <form action="/maps" method="post">
+        <h2>Enter a place:</h2>
+        <textarea name="place" cols="50" rows="1">{{location}}</textarea>
+        <button type="submit">Search</button>
+    </form>
+    <a href="https://google.com/maps/place/{{location}}" target="_blank">See <b>{{location}}</b> on maps (for latitude, longitude, etc.)</a><br><br>
+    <a href="https://google.com/search?q={{location}}+time+zone" target="_blank">Time zone of <b>{{location}}</b></a><br>
     <img src="{{url_for('static', filename='Image/yearth.png')}}" alt="sun" height="70%">
 </body>
 
