@@ -22,7 +22,7 @@ degs = ["degree", "deg", "d"]
 ms = ["m", "meter", "meters", "metre", "metres"]
 kms = ["km", "kilometer", "kilometers", "kilometre", "kilometres"]
 
-sunriseset = [(st.sunTimes, [6,5,0,4]), (st.sunTimeAltitude, [6,5,0,4,9])]
+sunriseset = [(st.sunTimeAltitude, [6,5,0,4,9]), (st.sunTimes, [6,5,0,4])]
 
 answerMap = {
     1: [(sp.sunHeight, [6,5,0,4,3])], 2: [(sp.sunPosition, [6,5,0,4,3])], 
@@ -139,6 +139,9 @@ class Abstract:
     
     def formResponse(self):
         self.response = []
+        if self.details[10] == "km":
+            self.details[10] = "m"
+            self.details[9] *= 1000
         def checkAnswer(maps):
             missing = []
             for m in maps:
@@ -280,7 +283,6 @@ class Calculator:
                 continue
             
             num, unit = self.parseAngleAltitude()
-            print(num, unit)
             if num and num != '':
                 if unit != "deg":
                     ab.details[9] = num
