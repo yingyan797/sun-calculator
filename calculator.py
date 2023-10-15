@@ -15,6 +15,9 @@ querySet = {
     "altitude": 9, "elavation": 9
 }
 
+fields = ["Time zone GMT: ", "Sun height angle: ", "Sun direction angle: ", "At Time(s) of--", 
+          "On Date(s) of--", "Longitude: ", "Latitude: ", "Sunrise time: ", "Sunset time: ", "Observing at altitude: "]
+
 sunriseset = [(st.sunTimes, [6,5,0,4]), (st.sunTimeAltitude, [6,5,0,4,9])]
 
 answerMap = {
@@ -31,7 +34,7 @@ class Abstract:
         self.interpret = ""
         self.conditions = []
         self.given = []
-        self.response = None
+        self.response = []
 
     def clear(self):
         self.queries = []
@@ -39,7 +42,7 @@ class Abstract:
         self.details = [None for i in range(11)]
         self.interpret = ""
         self.conditions = []
-        self.response = None
+        self.response = []
 
     def addDate(self, month, day):
         self.details[4] = Date(int(month), int(day))
@@ -107,31 +110,32 @@ class Abstract:
             self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
         
         lat, lon = self.details[6], self.details[5]
+        cs = []
         if lat != None and lon != None:
             self.conditions.append("At geographical coordinate: "+util.showLat(lat)+", "+util.showLon(lon))
         else:
             if lat != None:
-                self.conditions.append("At Latitude: "+util.showLat(lat))
+                self.conditions.append(fields[6]+util.showLat(lat))
             elif lon != None:
-                self.conditions.append("At Longitude: "+util.showLon(lon))
-
+                self.conditions.append(fields[5]+util.showLon(lon))
+        
         if self.details[4]:
-            self.conditions.append("On date: "+self.details[4].show())
+            self.conditions.append(fields[4]+self.details[4].show())
         if self.details[3]:
-            self.conditions.append("At local time: "+self.details[3].show())
+            self.conditions.append(fields[3]+self.details[3].show())
         if self.details[0]:
             gmt = self.details[0]
-            c = "Time zone: GMT"
+            c = fields[0]
             if gmt > 0:
                 c += '+'+str(gmt)
             else:
                 c += str(gmt)
             self.conditions.append(c)
         if self.details[9]:
-            self.conditions.append("Observing at altitude: "+str(self.details[9])+self.details[10])
+            self.conditions.append(fields[9]+str(self.details[9])+self.details[10])
     
     def formResponse(self):
-        self.response = None
+        self.response = []
         def checkAnswer(maps):
             missing = []
             for m in maps:
@@ -151,28 +155,22 @@ class Abstract:
                     return m[0](args), None
             return None,missing
         
-        res = []
-        res78 = []
-        missing = []
-        qtemp = []
+        res, res78, missing, qtemp, temp78 = [], [], [], [], []
         q1 = False
-        temp78 = []
         miss78 = None
         for q in self.queries:
             if q == 1:
                 q1 = True
             elif q == 2:
                 r,m = checkAnswer(answerMap[2])
-                if r:
-                    if q1:
-                        qtemp.append(1)
-                        res += [r[0], r[1]]
-                    else:
-                        res.append(r[1]) 
+                if q1:
+                    qtemp.append(1)
+                    res += [r[0], r[1]]
                 else:
+                    res.append(r[1]) 
+                missing.append(m)
+                if q1:
                     missing.append(m)
-                    if q1:
-                        missing.append(m)
                 qtemp.append(2)
                 q1 = False
             elif q in [7,8]:
@@ -180,31 +178,42 @@ class Abstract:
                     r,miss78 = checkAnswer(answerMap[7])
                     if r:
                         res78 += [r[0], r[1]]
+                    else:
+                        res78 += [None, None]
                 temp78.append(q)
             
             elif q in answerMap:
                 maps = answerMap[q]
                 qtemp.append(q)
                 r, m = checkAnswer(maps)
-                if r:
-                    res.append(r)
-                else:
-                    missing.append(m)
+                res.append(r)
+                missing.append(m)
 
         if q1:
             qtemp.append(1)
             r,m = checkAnswer(answerMap[1])
-            if r:
-                res.append(r) 
-            else:
-                missing.append(m)
+            res.append(r) 
+            missing.append(m)
         qtemp += temp78
         for i in temp78:
             res.append(res78[i-7])
-            if not miss78 is None:
-                missing.append(miss78)
+            missing.append(miss78)
         
-        self.response = len(qtemp), qtemp, res, missing
+        for i in range(len(qtemp)):
+            info = ""
+            if res[i] is not None:
+                info = fields[qtemp[i]]+res[i]
+            if missing[i] is not None:
+                info = "Calculating "+fields[qtemp[i]]+"Missing Information: "
+                for m in missing[i][0]:
+                    info += fields[m]
+                for ms in missing[i][1:]:
+                    info += "; Or: "
+                    for m in ms:
+                        info += fields[m]
+            self.response.append(info)
+        # for qt in qtemp:
+        #     self.response.append(fields[qt]+res[qt])
 
     def show(self):
         print(self.formQuestion())
@@ -254,7 +263,6 @@ class Calculator:
                 ab.details[3] = time
                 continue
             lat, lon = self.parseLocation()
-            print("loc",lat, lon)
             if lon is not None:
                 ab.details[6] = lat
                 ab.details[5] = lon
@@ -483,7 +491,6 @@ class Calculator:
             return (None, None)
         
         self.notMatchToken = ""
-        print("nmt",self.taskDesc[self.readProgress:])
         if loc1[1] == 'e':
             return (float(loc2[0]), float(loc1[0]))
         return (float(loc1[0]), float(loc2[0]))
@@ -600,16 +607,16 @@ class Calculator:
 # c.parseTask("Abu dhabi sunset hour\nlondon sun height july 4")
 # print(util.findFloat("0.-2e2.5e25"))
 # print("-3".isnumeric())
-# ab = Abstract("", 1)
-# ab.clear()
-# ab.details[6] = 35
-# ab.details[5] = 120
-# ab.details[0] = 8
-# ab.details[3] = Time(12,0,0,0)
-# ab.details[4] = Date(6,22)
-# ab.queries = [3,4]
-# ab.formResponse()
-# print(ab.response)
+ab = Abstract("", 1)
+ab.clear()
+ab.details[6] = 35
+ab.details[5] = 120
+ab.details[0] = 8
+ab.details[3] = Time(12,0,0,0)
+ab.details[4] = Date(6,22)
+ab.queries = [3]
+ab.formResponse()
+print(ab.response)
 
 '''
 calculate the sunset hour of london 51N 0.1E gmt+1 on june 25

@@ -87,7 +87,7 @@ def index():
         ab = calc.abstracts[abi]
         td = request.form.get("Question"+str(ab.num))
         rs = request.form.get("Reset"+str(ab.num))
-        if rs or td is not None and td != ab.taskDesc:
+        if rs or (td is not None and td != ab.taskDesc):
             calc.taskDesc = td
             calc.abstracts[abi] = calc.parseDesc(ab.num)
         elif request.form.get("Calculate"+str(ab.num)):

@@ -93,7 +93,9 @@
                     <br><label for="adding">Add details</label><input type="radio" name="adding" value="{{ab.num}}" form="details">
                     <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate">
                     <br>
-                    {{ab.response}}
+                    {% for resp in ab.response %}
+                        <b>{{resp}}</b><br>
+                    {% endfor %}
                     <br><br>
                 {% endfor %}
             </form>
