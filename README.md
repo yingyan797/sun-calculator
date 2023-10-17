@@ -1,15 +1,9 @@
-﻿# sun-calculator
-The program is able to calculate the sunrise and sunset times at any geographic coordinate on earth and on any date of the year (approximately), as long as the time zone (GMT+n) information is known. 
+﻿# Y-Earth: Interactive sun calculator 
+ 
+This web application is designed to calculate the multiple categories of the sun's position and time information given a variety of user inquiries. User can describe their questions in natural sentences, and the query processor is capable of extracting essential information, understanding the questions, and produce solutions. Another way of presenting queries is by directly filling in a form. In fact, a combination of sentence description and form submission is accepted. The calculator can also detect any missing conditions in user queries and provide hints to add more details.
 
-The current version assumes observations are made on the surface of the earth without altitude information. 365.25 days per year (average), 28.25 days in February, and 86400 seconds per day are used for calculation. Simple models and spherical geometry analysis are used, without considering details in more depth, so calculation is only an approximate result.
+Calculation is based on spherical geometry and vector operations with no reliance on external data sources. The model is relatively simple, so result is not 100% accurate for rigorous scientific usage (although can serve as a good reference or verification). Nevertheless, deviation is small enough for applications like photography, architecture, detectives, and other daily, casual use cases. 
 
-To try this program, run test.py to see two examples or use the tabulate() function to view a table of 3 locations and 4 dates.
+This product is written in Python, Flask, and html. It is currently available for local machines after downloading the code. To launch the calculator, open "dashboard.py", run the file, and use a browser (localhost: 5005) to see the web page. No internet connection is required to use the calculator, as long as user can provide every condition needed for solutions.
 
-Also, you can use calcSun() function in test.py to create your own example. Provide latitude, longitude, time zone (GMT+n), and date, in this order, to view results. Sunrise and sunset are local times in the given time zone.
-
-For example: calcSun(43.65, -79.35, -4, Date(7,1))
-
-Note: 
-1) Latitude (-90 to 90) and lontitude (-180 to 180) units are degree, with positive suggesting north/east and negative south/west
-2) GMT input range is from -12 to 12 inclusive
-3) Date argument is constructed by the Date(month, day) constructor
+The mathematical models, query processor, and web page is 100% designed by the owner, with no reliance on other source. Code is 100% original.
