@@ -9,7 +9,16 @@
         <button type="submit">Search</button>
     </form>
     <a href="https://google.com/maps/place/{{location}}" target="_blank">See <b>{{location}}</b> on maps (for latitude, longitude, etc.)</a><br><br>
-    <a href="https://google.com/search?q={{location}}+time+zone" target="_blank">Time zone of <b>{{location}}</b></a><br>
-    <img src="{{url_for('static', filename='Image/yearth.png')}}" alt="sun" height="70%">
+    <a href="https://google.com/search?q={{location}}+time+zone" target="_blank">Time zone of <b>{{location}}</b></a><br><br>
+    <form action="/maps" method="post">
+        Save geographical information for the place <input type="text" name="rplace" placeholder="{{location}}" size="45"><br>
+        Longitude: <input type="number" min="-180" max="180" name="Longitude">
+        East<input type="radio" name="EW" value="East">; West<input type="radio" name="EW" value="West">
+        Latitude: <input type="number" min="-90" max="90" name="Latitude">
+        North<input type="radio" name="NS" value="North">; South<input type="radio" name="NS" value="South"><br>
+        Time zone--GMT: <input type="number" min="-12" max="12" name="GMT"><br>
+        <button type="submit">Register or Update</button>
+    </form>
+    <!-- <img src="{{url_for('static', filename='Image/yearth.png')}}" alt="sun" height="70%"> -->
 </body>
 

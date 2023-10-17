@@ -2,7 +2,17 @@
     <title>Information</title>
 </head>
 <body>
-    <h1>How to use and FAQs </h1>
+    <h1 style="background-color: skyblue;">About Sun Calculator</h1>
     <p>Page under development...</p>
-    <img src="{{url_for('static', filename='Image/yearth.png')}}" alt="sun" height="70%">
+    {% if info == "User guide" %}
+    <h2>Help Center</h2>
+    {% endif %}
+
+    {% if info == "More information" %}
+    <h2>Software Information</h2>
+    {% endif %}
+
+    {% if info == "Contact us" %}
+    <h2>Contact Us</h2>
+    {% endif %}
 </body>

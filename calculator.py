@@ -1,7 +1,7 @@
 from dateTime import Date, Time
 import sunTime as st
 import sunPosition as sp
-import util
+import util, model
 
 months = {
     "january": "1","jan": "1","february": "2","feb": "2","march": "3","mar": "3","april": "4","apr": "4","may": "5",
@@ -11,11 +11,11 @@ months = {
 
 querySet = {
     "height": 1, "ht": 1, "high": 1, "direction": 2, "dir": 2, "orientation": 2, "time": 3, "date": 4, "day": 4,
-    "longitude": 5, "lon": 5, "latitude": 6, "lat": 6, "sunrise": 7, "sunset": 8, "above": 1, "below": 0,
-    "altitude": 9, "elavation": 9
+    "longitude": 5, "lon": 5, "latitude": 6, "lat": 6, "sunrise": 7, "sunset": 8, "above": 1, "below": 1, 
+    "altitude": 9, "elavation": 9, "zone": 0
 }
 
-fields = ["Time zone", "Sun height angle", "Sun direction angle", "Local time(s)", 
+fields = ["Time zone--GMT", "Sun height angle", "Sun direction angle", "Local time(s)", 
           "Date(s)", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation"]
 
 degs = ["degree", "deg", "d"]
@@ -28,7 +28,7 @@ answerMap = {
     1: [(sp.sunHeight, [6,5,0,4,3])], 2: [(sp.sunPosition, [6,5,0,4,3])], 
     3: [(sp.sunHeightTimeLim, [6,5,0,4,1]), (sp.sunDirectionTimeLim, [6,5,0,4,2])],
     4: [(sp.sunDateLim, [6,5,0,3,1]), (sp.sunDateLim, [6,5,0,3,2])],
-    7: sunriseset, 8: sunriseset
+    7: sunriseset, 8: sunriseset, 0: [(model.thrTimeZone, [5])]
 }
 
 class Abstract:
@@ -37,7 +37,7 @@ class Abstract:
         self.num = num
         self.interpret = ""
         self.conditions = []
-        self.given = []
+        self.negate = False
         self.response = []
 
     def clear(self):
@@ -76,34 +76,32 @@ class Abstract:
         qi = 0
         while qi < len(self.queries):
             q = self.queries[qi]
-            if q <= 1 and len(self.angles) > 0:
+            print("query", q)
+            if q == 1 and len(self.angles) > 0:
                 self.queries.pop(qi)
                 self.details[1] = self.angles.pop(0)
-                if q == 0:
-                    self.details[1] *= -1
+                if self.negate:
+                    self.details *= (-1)
             elif q == 2 and len(self.angles) > 0:
                 self.queries.pop(qi)
                 self.details[2] = self.angles.pop(0)
             elif q == 5 and self.details[6] == None:
                 self.queries.pop(qi)
-            elif q == 4 and self.details[4]:
-                self.queries.pop(qi)
-            elif q == 3 and self.details[3]:
-                self.queries.pop(qi)
-            elif q == 9 and self.details[9]:
+            elif q in [4,3,9,0] and self.details[q]:
                 self.queries.pop(qi)
             else:
                 qi += 1
+            print(self.queries)
 
     def formQuestion(self):
         self.interpret = ""
         if self.queries == []:
             self.interpret += "Sorry, I can't unserstand your question."
             return
-        qs = ["What is the height angle of the sun (below horizon)?", "What is the height angle of the sun (above horizon)?", 
+        qs = ["What is the (theoretical) time zone?", "What is the height angle of the sun (relative to horizon)?", 
               "What is the direction of the sun (angle clockwise from North)?", "What time of the day is it when", 
               "Which date is it when", "What is the longitude of a location where", "What is the latitude of a location where", 
-              "When does sunrise occur?", "When does sunset occur?", "What altitude of observation (in meters) is it where"]
+              "When time does sunrise occur?", "When time does sunset occur?", "What altitude of observation (in meters) is it where"]
         self.interpret += qs[self.queries[0]]
         for qi in self.queries[1:]:
             self.interpret += "  "+qs[qi]
@@ -295,7 +293,10 @@ class Calculator:
             if query:
                 i = querySet[query]
                 if i not in ab.queries:
+                    if query == "below":
+                        ab.negate = True
                     ab.queries.append(i)
+                continue
 
             self.notMatchToken = ""
 
@@ -553,6 +554,23 @@ class Calculator:
                 return query
         
         elif t in querySet:
+            if t in ["sunrise", "sunset"]:
+                query = t
+                t = self.readToken()
+                if t != "time":
+                    self.notMatchToken = t
+                else:
+                    self.notMatchToken = ""
+                return query
+
+            elif t == "time":
+                t = self.readToken()
+                if t != "zone":
+                    self.notMatchToken = t
+                    return "time"
+                self.notMatchToken = ""
+                return "zone"
+
             self.notMatchToken = ""
             return t
             

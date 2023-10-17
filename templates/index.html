@@ -10,7 +10,7 @@
     .column {
       float: left;
       width: 50%;
-      padding: 10px;
+      padding: 25px;
       /* height: 300px; Should be removed. Only for demonstration */
     }
     
@@ -24,25 +24,25 @@
     </style>
 </head>
 
-<body  style="background-image: url('../static/Image/yearth.png');">
+<body style="background-image: url('../static/Image/yearth.png');">
     <!-- style="background-image: url('../static/Image/yearth.png');" -->
     <h1 align="center">Y-EARTH | Interactive Sun Calculator 交互式太阳时空信息计算器</h1>
     <div class="row">
         <div class="column" style="background-color:lightgoldenrodyellow;">
             <form action="/information" method="post" target="_blank">
-                <input type="submit" name="help" value="User guide">
+                <input type="submit" name="info" value="User guide">
                 <input type="submit" name="info" value="More information">
-                <input type="submit" name="contact" value="Contact us">
+                <input type="submit" name="info" value="Contact us">
             </form> 
             <form action="/maps" method="post" target="_blank">
-                <b><label for="location">Find geographical information of a place</label></b>
+                <b><label for="location">Find or register a place</label></b>
                 <input type="text" name="location">
-                <button type="submit">Search</button>
+                <button type="submit">Continue</button>
             </form>
             <form action="/" method="post" id="questions">
                 <h2>Describe all questions in words.</h2>
                 <p>What would you like to calculate? Write any number of questions, each one in a new line.</p>
-                <textarea name="taskDesc" rows="8" cols="85"></textarea><br><br>     
+                <textarea name="taskDesc" rows="5" cols="85"></textarea><br><br>     
                 <button type="submit">Summarize questions>></button>
             </form>
             <form action="/" method="post" id="details">
@@ -83,7 +83,7 @@
             </form>
 
         </div>
-        <div class="column" style="background-color: lightgoldenrodyellow;">
+        <div class="column" style="background-color:aquamarine;">
             <form action="/" method="post">
                 <h2>Question summary and calculation
                 <button type="submit">Refresh All</button></h2>
@@ -101,7 +101,7 @@
                     <input type="radio" name="adding" value="{{ab.num}}" form="details">                   
                     <label for="adding">Add more details using the form</label>
                     <br><br>If the summary is correct, <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate"><br>
-                    <textarea readonly rows="5", cols="90">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea>
+                    <textarea readonly rows="4", cols="85">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea>
                     <br><br>
                 {% endfor %}
             </form>

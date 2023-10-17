@@ -105,7 +105,7 @@ def maps():
 
 @app.route('/information', methods=['GET', 'POST']) # show the main page
 def infomation():
-    return render_template('info.html')
+    return render_template('info.html', info=request.form.get('info'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5005, debug=True)
