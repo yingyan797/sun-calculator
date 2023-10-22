@@ -39,6 +39,7 @@ class Abstract:
         self.conditions = []
         self.negate = False
         self.response = []
+        self.place = None
 
     def clear(self):
         self.queries = []
@@ -47,6 +48,7 @@ class Abstract:
         self.interpret = ""
         self.conditions = []
         self.response = []
+        self.place = None
 
     def addDate(self, month, day):
         self.details[4] = Date(int(month), int(day))
@@ -76,7 +78,6 @@ class Abstract:
         qi = 0
         while qi < len(self.queries):
             q = self.queries[qi]
-            print("query", q)
             if q == 1 and len(self.angles) > 0:
                 self.queries.pop(qi)
                 self.details[1] = self.angles.pop(0)
@@ -91,17 +92,19 @@ class Abstract:
                 self.queries.pop(qi)
             else:
                 qi += 1
-            print(self.queries)
 
     def formQuestion(self):
-        self.interpret = ""
+        self.interpret = ""  
         if self.queries == []:
             self.interpret += "Sorry, I can't unserstand your question."
             return
-        qs = ["What is the (theoretical) time zone?", "What is the height angle of the sun (relative to horizon)?", 
-              "What is the direction of the sun (angle clockwise from North)?", "What time of the day is it when", 
-              "Which date is it when", "What is the longitude of a location where", "What is the latitude of a location where", 
-              "When time does sunrise occur?", "When time does sunset occur?", "What altitude of observation (in meters) is it where"]
+    
+        if self.place:
+            self.interpret = "At "+self.place+", "
+        qs = ["what is the (theoretical) time zone?", "what is the height angle of the sun (relative to horizon)?", 
+              "what is the direction of the sun (angle clockwise from North)?", "what time of the day is it when", 
+              "which date is it when", "what is the longitude of a location where", "what is the latitude of a location where", 
+              "what time does sunrise occur?", "what time does sunset occur?", "what altitude of observation (in meters) is it where"]
         self.interpret += qs[self.queries[0]]
         for qi in self.queries[1:]:
             self.interpret += "  "+qs[qi]
@@ -111,9 +114,10 @@ class Abstract:
         if self.details[2]:
             self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
         
+        self.interpret += " --Given that:"
         lat, lon = self.details[6], self.details[5]
         if lat != None and lon != None:
-            self.conditions.append("At geographical coordinate: "+util.showLat(lat)+", "+util.showLon(lon))
+            self.conditions.append("At coordinate: "+util.showLat(lat)+", "+util.showLon(lon))
         else:
             if lat != None:
                 self.conditions.append(fields[6]+": "+util.showLat(lat))
@@ -126,7 +130,7 @@ class Abstract:
             self.conditions.append(fields[3]+": "+self.details[3].show())
         if self.details[0] is not None:
             gmt = self.details[0]
-            c = "Time zone: GMT"
+            c = "Time zone: GMT "
             if gmt > 0:
                 c += '+'+str(gmt)
             else:
@@ -227,7 +231,7 @@ class Abstract:
         print(self.formQuestion())
 
 class Calculator:
-    def __init__(self, seps):
+    def __init__(self, seps=util.seps):
         self.seps = seps
         self.taskDesc = ""
         self.abstracts = []
@@ -235,6 +239,7 @@ class Calculator:
     def parseTask(self, tasks):
         ci = 0
         self.abstracts = []
+        self.table = util.readTable(util.dbfile, True)
         while True:
             if ci < len(tasks):
                 c = tasks[ci]
@@ -260,8 +265,11 @@ class Calculator:
         self.notMatchToken = ""
         ab = Abstract(self.taskDesc, abi)
         ab.clear()
+        self.taskDesc += " enddesc"
 
         while self.readProgress < len(self.taskDesc):
+            if self.parsePlace(ab):
+                continue
             date = self.parseDate()
             if date:
                 ab.details[4] = date
@@ -305,6 +313,26 @@ class Calculator:
         ab.formQuestion()
         return ab
 
+    def parsePlace(self, ab):
+        t = self.notMatchToken
+        if t == "":
+            t = self.readToken()
+        for row in self.table:
+            if t == row[1].lower():
+                ab.place = row[1]
+                lat = row[2]
+                if lat:
+                    ab.details[6] = float(lat)
+                lon = row[3]
+                if lon:
+                    ab.details[5] = float(lon)
+                gmt = row[4]
+                if gmt:
+                    ab.details[0] = int(gmt)
+                self.notMatchToken = ""
+                return True
+        self.notMatchToken = t
+        return False    
     
     def parseDate(self):
         t = self.notMatchToken

@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request,session, redirect, flash, jsonify
 import calculator as sc
+import record
+import util
 
 app = Flask(__name__)
-calc = sc.Calculator("~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n }")
+calc = sc.Calculator()
 
 @app.route('/', methods=['GET', 'POST']) # show the main page
 def index():
@@ -98,10 +100,33 @@ def index():
 @app.route('/maps', methods=['GET', 'POST']) # show the main page
 def maps():
     loc = request.form.get('location')
-    place = request.form.get('place')
-    if place and place != "":
-        loc = place
-    return render_template('maps.html', location = loc)
+    if loc and loc != "":
+        lon = request.form.get('Longitude')
+        lat = request.form.get('Latitude')
+        ew = request.form.get('EW')
+        ns = request.form.get('NS')
+        gmt = request.form.get('GMT')
+        table = record.registerPlace(loc, lon, lat, ew, ns, gmt)
+        return render_template('maps.html', location=loc, table=table)
+    
+    pn = 1
+    while True:
+        p = request.form.get("place"+str(pn))
+        if p == None:
+            break
+        d = request.form.get("delete"+str(pn))
+        if d:
+            record.deletePlace(p)
+        u = request.form.get("update"+str(pn))
+        if u:
+            c = request.form.get("coord"+str(pn))
+            g = request.form.get("gmt"+str(pn))
+            record.updatePlace(p, pn-1, c, g)
+        pn += 1
+
+    return render_template('maps.html', table=util.readTable(record.dbfile, False))
+
+    
 
 @app.route('/information', methods=['GET', 'POST']) # show the main page
 def infomation():

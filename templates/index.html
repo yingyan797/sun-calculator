@@ -94,9 +94,8 @@
                     <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea>
                     <br>You ask:
                     <b>{{ab.interpret}}</b><br>
-                    Given details:<br>
                     {% for cond in ab.conditions %}
-                        <b>--{{cond}}</b><br>
+                        <b>*  {{cond}}</b><br>
                     {% endfor %}
                     <input type="radio" name="adding" value="{{ab.num}}" form="details">                   
                     <label for="adding">Add more details using the form</label>

@@ -1,5 +1,27 @@
 import numpy as np
 from dateTime import Time, Date, mdays, dsecs
+seps = "~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n }"
+dbfile = "static/db/places.csv"
+
+def readTable(fn, parse):
+    f = open(fn, "r")
+    lines = f.readlines()
+    f.close()
+    rows = [l[:-1].split(",") for l in lines]
+    for pn in range(len(rows)):
+        if parse:
+            cct = ""
+            for c in rows[pn][0]:
+                if c not in seps:
+                    cct += c
+                else:
+                    cct += '-'
+            rows[pn][0] = cct
+        else:
+            rows[pn][1] = showLat(float(rows[pn][1]))+', '+showLon(float(rows[pn].pop(2))) 
+        rows[pn] = [pn+1]+rows[pn]
+                
+    return rows
 
 def arcCap(ac):
     if ac > 1:
@@ -63,16 +85,16 @@ def secondsToTime(secs):
     return Time(h, m ,secs, d)
 
 def showLon(lon):
-    if lon > 0:
+    if lon >= 0:
         return str(lon)+'E'
-    if lon < 0:
+    else:
         return str(-lon)+'W'
     return str(lon)
 
 def showLat(lat):
-    if lat > 0:
+    if lat >= 0:
         return str(lat)+'N'
-    if lat < 0:
+    else:
         return str(-lat)+'S'
     return str(lat)
 
