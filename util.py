@@ -89,14 +89,12 @@ def showLon(lon):
         return str(lon)+'E'
     else:
         return str(-lon)+'W'
-    return str(lon)
 
 def showLat(lat):
     if lat >= 0:
         return str(lat)+'N'
     else:
         return str(-lat)+'S'
-    return str(lat)
 
 def toLonVal(num, ew):
     if num > 0 and ew == "West":
@@ -140,3 +138,22 @@ def findFloat(tok):
     if digit:
         return num, i
     return "", i
+
+def directionClass(ang, rg):
+    if ang < rg or ang > 360-rg:
+        return "North"
+    if ang >= rg and ang <= 90-rg:
+        return "Northeast"
+    if ang > 90-rg and ang < 90+rg:
+        return "East"
+    if ang >= 90+rg and ang <= 180-rg:
+        return "Southeast"
+    if ang > 180-rg and ang < 180+rg:
+        return "South"
+    if ang >= 180+rg and ang <= 270-rg:
+        return "Southwest"
+    if ang > 270-rg and ang < 270+rg:
+        return "West"
+    if ang >= 270+rg and ang <= 360-rg:
+        return "Northwest"
+

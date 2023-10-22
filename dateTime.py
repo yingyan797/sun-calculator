@@ -105,8 +105,8 @@ class Time:
         if self.hour < 10:
             h = "0"+h
         if self.day > 0:
-            d = " <"+str(self.day)+" day(s) after>"
+            d = " <"+str(self.day)+" day after>"
         if self.day < 0:
-            d = " <"+str(-self.day)+" day(s) before>"
+            d = " <"+str(-self.day)+" day before>"
         return h+":"+m+":"+s+d
     

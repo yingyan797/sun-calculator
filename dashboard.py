@@ -35,15 +35,21 @@ def index():
             if i+2 not in abf.queries and request.form.get(qs[i]) == 'on':
                 abf.queries.append(i+2)
                 emptyForm = False 
+        if 0 not in abf.queries and request.form.get("TZ") == 'on':
+            abf.queries.append(0)
+            emptyForm = False 
+        if 11 not in abf.queries and request.form.get("Noon") == 'on':
+            abf.queries.append(11)
+            emptyForm = False 
 
         lon = request.form.get('Longitude') 
-        ew = request.form.get('ew')
+        ew = request.form.get('EW')
         if lon:
             abf.addLon(float(lon), ew)
             emptyForm = False 
 
         lat = request.form.get('Latitude') 
-        ns = request.form.get('ns')
+        ns = request.form.get('NS')
         if lat:
             abf.addLat(float(lat), ns)
             emptyForm = False 

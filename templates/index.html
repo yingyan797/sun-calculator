@@ -35,7 +35,7 @@
                 <input type="submit" name="info" value="Contact us">
             </form> 
             <form action="/maps" method="post" target="_blank" name="place">
-                <b><label for="location">Find a new place</label></b>
+                <b><label for="location">Find and register new places</label></b>
                 <input type="text" name="location">
                 <button type="submit">Search</button>
                 <button type="submit">See registered places</button>
@@ -50,20 +50,15 @@
                 <h2>Alternatively, fill in question details.</h2>
                 <p>You can also use this form to add more details to question summary.</p>
                 <b>You are asking for (one or more):</b><br>
-                <label for="Sunrise">Sunrise</label>
-                    <input type="checkbox" name="Sunrise">
-                <label for="Sunset">; Sunset</label>
-                    <input type="checkbox" name="Sunset">
-                <label for="Height">; Sun Height</label>
-                    <input type="checkbox" name="QHeight">
-                <label for="Direction">; Sun Direction</label>
-                    <input type="checkbox" name="QDirection">
-                <label for="Date">; Date</label>
-                    <input type="checkbox" name="QDate">
-                <label for="Time">; Time</label>
-                    <input type="checkbox" name="QTime">
-                <label for="Lat">; Latitude</label>
-                    <input type="checkbox" name="QLat">
+                Sunrise<input type="checkbox" name="Sunrise">
+                ; Sunset<input type="checkbox" name="Sunset">
+                ; Solar Noon<input type="checkbox" name="Noon">
+                ; Sun Height<input type="checkbox" name="QHeight">
+                ; Sun Direction<input type="checkbox" name="QDirection">
+                ; Date<input type="checkbox" name="QDate">
+                ; Local Time<input type="checkbox" name="QTime">
+                ; Time Zone<input type="checkbox" name="TZ">
+                ; Latitude<input type="checkbox" name="QLat">
                 
                 <br><br><b>Given conditions (only fill in if needed)</b><br>
                 <label for="Longitude">Longitude: </label><input type="number" min="-180" max="180" name="Longitude"></label> 
@@ -86,23 +81,20 @@
         </div>
         <div class="column" style="background-color:aquamarine;">
             <form action="/" method="post">
-                <h2>Question summary and calculation
+                <h2>Summary and calculation
                 <button type="submit">Refresh All</button></h2>
 
                 {% for ab in abstracts %}
-                    <h3>Question {{ab.num}}
-                    <input type="submit" name="Reset{{ab.num}}" value="Resubmit"></h3> 
+                    <b>-- Question {{ab.num}} -- </b><input type="submit" name="Reset{{ab.num}}" value="Resubmit"><br>
                     <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea>
-                    <br>You ask:
-                    <b>{{ab.interpret}}</b><br>
+                    Please confirm your question: <b>{{ab.interpret}}</b><br>
                     {% for cond in ab.conditions %}
-                        <b>*  {{cond}}</b><br>
+                        <b style="padding: 25px;">*  {{cond}}</b><br>
                     {% endfor %}
                     <input type="radio" name="adding" value="{{ab.num}}" form="details">                   
-                    <label for="adding">Add more details using the form</label>
+                    <label for="adding">Add or update details using the form</label>
                     <br><br>If the summary is correct, <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate"><br>
-                    <textarea readonly rows="4", cols="85">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea>
-                    <br><br>
+                    <textarea readonly rows="4", cols="80">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea><br>
                 {% endfor %}
             </form>
         </div>

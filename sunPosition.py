@@ -45,7 +45,9 @@ def sunPosition(args):
     noon = model.noonSecs(args[2], args[1])
     sinlat0 = model.sunDirectLatSin(args[3])
     ang, ht = sungeom(sinlat0, util.toRad(args[0]), [noon, args[4].toSecs()])
-    return util.toDeg(ht), util.toDeg(ang)
+    print("h, a", ht, ang)
+    ang = util.toDeg(ang)
+    return util.toDeg(ht), str(ang) +", "+ util.directionClass(ang, 10)
 
 def sunHeightTimeLim(args):
     # lat, lon, gmt, date, ht

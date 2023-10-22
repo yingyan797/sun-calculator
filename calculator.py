@@ -12,11 +12,11 @@ months = {
 querySet = {
     "height": 1, "ht": 1, "high": 1, "direction": 2, "dir": 2, "orientation": 2, "time": 3, "date": 4, "day": 4,
     "longitude": 5, "lon": 5, "latitude": 6, "lat": 6, "sunrise": 7, "sunset": 8, "above": 1, "below": 1, 
-    "altitude": 9, "elavation": 9, "zone": 0
+    "altitude": 9, "elavation": 9, "zone": 0, "noon": 11
 }
 
 fields = ["Time zone--GMT", "Sun height angle", "Sun direction angle", "Local time(s)", 
-          "Date(s)", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation"]
+          "Date(s)", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation", "","Solar noon"]
 
 degs = ["degree", "deg", "d"]
 ms = ["m", "meter", "meters", "metre", "metres"]
@@ -28,7 +28,7 @@ answerMap = {
     1: [(sp.sunHeight, [6,5,0,4,3])], 2: [(sp.sunPosition, [6,5,0,4,3])], 
     3: [(sp.sunHeightTimeLim, [6,5,0,4,1]), (sp.sunDirectionTimeLim, [6,5,0,4,2])],
     4: [(sp.sunDateLim, [6,5,0,3,1]), (sp.sunDateLim, [6,5,0,3,2])],
-    7: sunriseset, 8: sunriseset, 0: [(model.thrTimeZone, [5])]
+    7: sunriseset, 8: sunriseset, 0: [(model.thrTimeZone, [5])], 11: [(model.noonTime, [5, 0])]
 }
 
 class Abstract:
@@ -44,7 +44,7 @@ class Abstract:
     def clear(self):
         self.queries = []
         self.angles = []
-        self.details = [None for i in range(11)]
+        self.details = [None for i in range(12)]
         self.interpret = ""
         self.conditions = []
         self.response = []
@@ -96,38 +96,38 @@ class Abstract:
     def formQuestion(self):
         self.interpret = ""  
         if self.queries == []:
-            self.interpret += "Sorry, I can't unserstand your question."
+            self.interpret += "**Sorry, I can't unserstand your question."
             return
     
         if self.place:
-            self.interpret = "At "+self.place+", "
+            self.interpret = "at "+self.place+", "
         qs = ["what is the (theoretical) time zone?", "what is the height angle of the sun (relative to horizon)?", 
               "what is the direction of the sun (angle clockwise from North)?", "what time of the day is it when", 
               "which date is it when", "what is the longitude of a location where", "what is the latitude of a location where", 
-              "what time does sunrise occur?", "what time does sunset occur?", "what altitude of observation (in meters) is it where"]
-        self.interpret += qs[self.queries[0]]
-        for qi in self.queries[1:]:
-            self.interpret += "  "+qs[qi]
+              "what time does sunrise occur?", "what time does sunset occur?", "what altitude of observation (in meters) is it where",
+              "", "what time is the solar noon?"]
+        for qi in self.queries:
+            self.interpret += qs[qi] + " "
+        self.interpret = self.interpret[0].upper() + self.interpret[1:]
 
         if self.details[1]:
             self.interpret += " the sun is at "+str(self.details[1])+" degree above horizon?"
         if self.details[2]:
             self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
         
-        self.interpret += " --Given that:"
+        self.interpret += "--Given conditions:"
         lat, lon = self.details[6], self.details[5]
         if lat != None and lon != None:
-            self.conditions.append("At coordinate: "+util.showLat(lat)+", "+util.showLon(lon))
+            self.conditions.append("Location: "+util.showLat(lat)+", "+util.showLon(lon))
         else:
             if lat != None:
                 self.conditions.append(fields[6]+": "+util.showLat(lat))
             elif lon != None:
                 self.conditions.append(fields[5]+": "+util.showLon(lon))
         
-        if self.details[4]:
-            self.conditions.append(fields[4]+": "+self.details[4].show())
-        if self.details[3]:
-            self.conditions.append(fields[3]+": "+self.details[3].show())
+        for i in [4, 3]:
+            if self.details[i]:
+                self.conditions.append(fields[4]+": "+self.details[4].show())
         if self.details[0] is not None:
             gmt = self.details[0]
             c = "Time zone: GMT "
@@ -212,7 +212,7 @@ class Abstract:
         for i in range(len(qtemp)):
             info = ""
             if res[i] is not None:
-                info = fields[qtemp[i]]+": "+str(res[i])+'\n'
+                info = fields[qtemp[i]]+": "+str(res[i])
             if missing[i] is not None:
                 info = "Calculating: "+fields[qtemp[i]]+"; **The following information is missing: \n  <Case 1>"
                 c = 1
@@ -268,6 +268,7 @@ class Calculator:
         self.taskDesc += " enddesc"
 
         while self.readProgress < len(self.taskDesc):
+            print(self.notMatchToken, ",", self.taskDesc[self.readProgress:])
             if self.parsePlace(ab):
                 continue
             date = self.parseDate()
@@ -279,9 +280,9 @@ class Calculator:
                 ab.details[3] = time
                 continue
             lat, lon = self.parseLocation()
-            if lon is not None:
-                ab.details[6] = lat
+            if (lat, lon) != (None, None):
                 ab.details[5] = lon
+                ab.details[6] = lat
                 continue
             gmt = self.parseGMT()
             if gmt is not None:
@@ -305,6 +306,7 @@ class Calculator:
                         ab.negate = True
                     ab.queries.append(i)
                 continue
+            print(self.taskDesc[self.readProgress:], 2)
 
             self.notMatchToken = ""
 
@@ -495,7 +497,7 @@ class Calculator:
                 return ("", '')
 
             prg = self.readProgress
-            if loc[0] != '-' and d == '':
+            if d == '':
                 t = self.readToken()
                 if t in ["degree", "deg", "deg.", "d.", "d"]:
                     t = self.readToken()
@@ -509,8 +511,7 @@ class Calculator:
                     d = 'w'
                 else:
                     self.readProgress = prg
-                    t = self.notMatchToken
-                    return ("",'')
+                    return (loc,'')
 
             if loc[0] != '-' and d != '':
                 if d == 's':
@@ -525,16 +526,18 @@ class Calculator:
         loc1 = toCoord(t)
         if loc1 != ("", ''):
 
-            prg = self.readProgress
-            t0 = t
             t = self.readToken()
             loc2 = toCoord(t)
 
+            print(loc1, loc2)
             if loc1[1] != '':  
                 if loc2 == ("", ''):
-                    self.readProgress = prg
-                    self.notMatchToken = t0
-                    return (None, float(loc1[0]))
+                    self.notMatchToken = t
+                    match loc1[1]:
+                        case 'e'|'w':
+                            return (None, float(loc1[0]))
+                        case 'n'|'s':
+                            return (float(loc1[0]), None)
             # else:
             #     t = t0
             #     self.readProgress = prg
@@ -582,7 +585,7 @@ class Calculator:
                 return query
         
         elif t in querySet:
-            if t in ["sunrise", "sunset"]:
+            if t in ["sunrise", "sunset", "noon"]:
                 query = t
                 t = self.readToken()
                 if t != "time":

@@ -20,6 +20,9 @@ def sunDirectLatSin(date):
 def noonSecs(gmt, lon):
     return dsecs/2 + (15*gmt-lon)/15*3600
 
+def noonTime(args):
+    return util.secondsToTime(noonSecs(args[1], args[0])).show()
+
 def horizonArc(alt):
     return np.arccos(arcCap(earthRadius/(earthRadius+alt)))
 
