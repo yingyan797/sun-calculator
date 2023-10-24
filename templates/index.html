@@ -35,21 +35,21 @@
                 <input type="submit" name="info" value="Contact us">
             </form> 
             <form action="/maps" method="post" target="_blank" name="place">
-                <b><label for="location">Find and register new places</label></b>
+                <label for="location">Find or register a place</label>
                 <input type="text" name="location">
-                <button type="submit">Search</button>
-                <button type="submit">See registered places</button>
+                <button type="submit">Continue</button>
+                <a href="/maps" target="_blank"><b>See registered places</b></a>
             </form>
             <form action="/" method="post" id="questions">
-                <h2>Describe all questions in words.</h2>
-                <p>What would you like to calculate? Write any number of questions, each one in a new line.</p>
+                <h2>Describe what you would like to calculate</h2>
+                <b>Write any number of questions, starting each one in a new line</b><br>
+                    **Feel free to use the names of registered places instead of specifying all associated details! <br><br>
                 <textarea name="taskDesc" rows="5" cols="85"></textarea><br><br>     
                 <button type="submit">Summarize questions>></button>
             </form>
             <form action="/" method="post" id="details">
                 <h2>Alternatively, fill in question details.</h2>
-                <p>You can also use this form to add more details to question summary.</p>
-                <b>You are asking for (one or more):</b><br>
+                <b>What to calculate? (select 1 or more)</b><br>
                 Sunrise<input type="checkbox" name="Sunrise">
                 ; Sunset<input type="checkbox" name="Sunset">
                 ; Solar Noon<input type="checkbox" name="Noon">
@@ -60,21 +60,21 @@
                 ; Time Zone<input type="checkbox" name="TZ">
                 ; Latitude<input type="checkbox" name="QLat">
                 
-                <br><br><b>Given conditions (only fill in if needed)</b><br>
-                <label for="Longitude">Longitude: </label><input type="number" min="-180" max="180" name="Longitude"></label> 
+                <br><br><b>Given conditions (fill in only if needed)</b><br>
+                <label for="Longitude">Longitude: </label><input type="number" step="0.01" min="-180" max="180" name="Longitude"></label> 
                     <label for="East">East</label><input type="radio" name="EW" value="East"><label for="West">;West</label><input type="radio" name="EW" value="West">
-                <label for="Latitude"> Latitude: </label><input type="number" min="-90" max="90" name="Latitude"></label>
+                , Latitude: <input type="number" step="0.01" min="-90" max="90" name="Latitude"></label>
                     <label for="North">North</label><input type="radio" name="NS" value="North"><label for="South">;South</label><input type="radio" name="NS" value="South"><br>
-                <label for="Altitude">Altitude: </label><input type="number" min="0" name="Altitude">
-                <label for="m">m</label><input type="radio" name="unit" value="m"><label for="km">km</label><input type="radio" name="unit" value="km"><br>
-                <label for="Month">Date: Month </label><input type="number" min="1" max="12" name="Month">
-                <label for="Day">Day </label><input type="number" min="1" max="31" name="Day"><br>
+                <label for="Altitude">Altitude: </label><input type="number" step="0.01" min="0" name="Altitude">
+                m<input type="radio" name="unit" value="m">; km<input type="radio" name="unit" value="km">; ft<input type="radio" name="unit" value="ft"><br>
+                Date: Month <input type="number" min="1" max="12" name="Month">
+                / Day <input type="number" min="1" max="31" name="Day"><br>
                 Local Time <input type="number" min="0" max="24" name="Hour">
                 : <input type="number" min="0" max="59" name="Minute">
                 : <input type="number" min="0" max="59" name="Second">
                 <label for="GMT">Time Zone GMT </label><input type="number" min="-12" max="12" name="GMT"><br>   
-                <label for="Height">Sun Height Angle: </label><input type="number" min="-90" max="90" name="Height">
-                <label for="Direction">Sun Direction Angle: </label><input type="number" min="0" max="360" name="Direction"><br><br>
+                <label for="Height">Sun Height Angle: </label><input type="number" step="0.01" min="-90" max="90" name="Height">
+                <label for="Direction">Sun Direction Angle: </label><input type="number" step="0.01" min="0" max="360" name="Direction"><br><br>
                 <button type="submit">Submit form>></button>
             </form>
 
@@ -87,14 +87,14 @@
                 {% for ab in abstracts %}
                     <b>-- Question {{ab.num}} -- </b><input type="submit" name="Reset{{ab.num}}" value="Resubmit"><br>
                     <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea>
-                    Please confirm your question: <b>{{ab.interpret}}</b><br>
+                    Question summary: <b>{{ab.interpret}}</b><br>
                     {% for cond in ab.conditions %}
                         <b style="padding: 25px;">*  {{cond}}</b><br>
                     {% endfor %}
-                    <input type="radio" name="adding" value="{{ab.num}}" form="details">                   
-                    <label for="adding">Add or update details using the form</label>
-                    <br><br>If the summary is correct, <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate"><br>
-                    <textarea readonly rows="4", cols="80">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea><br>
+                    Is the summary correct?
+                    <input type="radio" name="adding" value="{{ab.num}}" form="details"><b>Add/Update details using the form | </b> 
+                    <input type="submit" name="Calculate{{ab.num}}" value="Confirm and calculate">
+                    <textarea readonly rows="4", cols="80">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea><br><br>
                 {% endfor %}
             </form>
         </div>

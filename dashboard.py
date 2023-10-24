@@ -5,6 +5,7 @@ import util
 
 app = Flask(__name__)
 calc = sc.Calculator()
+calc.table = util.readTable(util.dbfile, True)
 
 @app.route('/', methods=['GET', 'POST']) # show the main page
 def index():

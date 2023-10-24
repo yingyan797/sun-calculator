@@ -15,8 +15,8 @@ querySet = {
     "altitude": 9, "elavation": 9, "zone": 0, "noon": 11
 }
 
-fields = ["Time zone--GMT", "Sun height angle", "Sun direction angle", "Local time(s)", 
-          "Date(s)", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation", "","Solar noon"]
+fields = ["Time zone--GMT", "Sun height angle", "Sun direction angle", "Local time", 
+          "Date", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation", "","Solar noon"]
 
 degs = ["degree", "deg", "d"]
 ms = ["m", "meter", "meters", "metre", "metres"]
@@ -51,7 +51,9 @@ class Abstract:
         self.place = None
 
     def addDate(self, month, day):
-        self.details[4] = Date(int(month), int(day))
+        d = Date(int(month), int(day))
+        if d.check():
+            self.details[4] = d
     
     def addTime(self, h, m, s):
         sec = 0
@@ -96,25 +98,24 @@ class Abstract:
     def formQuestion(self):
         self.interpret = ""  
         if self.queries == []:
-            self.interpret += "**Sorry, I can't unserstand your question."
-            return
-    
-        if self.place:
-            self.interpret = "at "+self.place+", "
-        qs = ["what is the (theoretical) time zone?", "what is the height angle of the sun (relative to horizon)?", 
-              "what is the direction of the sun (angle clockwise from North)?", "what time of the day is it when", 
-              "which date is it when", "what is the longitude of a location where", "what is the latitude of a location where", 
-              "what time does sunrise occur?", "what time does sunset occur?", "what altitude of observation (in meters) is it where",
-              "", "what time is the solar noon?"]
-        for qi in self.queries:
-            self.interpret += qs[qi] + " "
-        self.interpret = self.interpret[0].upper() + self.interpret[1:]
+            self.interpret += "**Sorry, unable to detect what value(s) to calculate. "
+        else:    
+            if self.place:
+                self.interpret = "at "+self.place+", "
+            qs = ["what is the (theoretical) time zone?", "what is the height angle of the sun (relative to horizon)?", 
+                "what is the direction of the sun (angle clockwise from North)?", "what time of the day is it when", 
+                "which date is it when", "what is the longitude of a location where", "what is the latitude of a location where", 
+                "what time does sunrise occur?", "what time does sunset occur?", "what altitude of observation (in meters) is it where",
+                "", "what time is the solar noon?"]
+            for qi in self.queries:
+                self.interpret += qs[qi] + " "
+            self.interpret = self.interpret[0].upper() + self.interpret[1:]
 
-        if self.details[1]:
-            self.interpret += " the sun is at "+str(self.details[1])+" degree above horizon?"
-        if self.details[2]:
-            self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
-        
+            if self.details[1]:
+                self.interpret += " the sun is at "+str(self.details[1])+" degree above horizon?"
+            if self.details[2]:
+                self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
+            
         self.interpret += "--Given conditions:"
         lat, lon = self.details[6], self.details[5]
         if lat != None and lon != None:
@@ -127,7 +128,7 @@ class Abstract:
         
         for i in [4, 3]:
             if self.details[i]:
-                self.conditions.append(fields[4]+": "+self.details[4].show())
+                self.conditions.append(fields[i]+": "+self.details[i].show())
         if self.details[0] is not None:
             gmt = self.details[0]
             c = "Time zone: GMT "
@@ -214,7 +215,7 @@ class Abstract:
             if res[i] is not None:
                 info = fields[qtemp[i]]+": "+str(res[i])
             if missing[i] is not None:
-                info = "Calculating: "+fields[qtemp[i]]+"; **The following information is missing: \n  <Case 1>"
+                info = fields[qtemp[i]]+": **Missing the following information: \n  <Case 1>"
                 c = 1
                 for m in missing[i][0]:
                     info += ", "+fields[m]
@@ -239,22 +240,22 @@ class Calculator:
     def parseTask(self, tasks):
         ci = 0
         self.abstracts = []
-        self.table = util.readTable(util.dbfile, True)
         while True:
             if ci < len(tasks):
                 c = tasks[ci]
                 
-                if c != '\n':
+                if c not in "\n\r":
                     self.taskDesc += c
                     ci += 1
                     continue
 
                 while ci < len(tasks):
-                    if tasks[ci] == '\n':
+                    if tasks[ci] in "\n\r":
                         ci += 1
                     else:
                         break
-            self.abstracts.append(self.parseDesc(len(self.abstracts)+1)) 
+            self.abstracts.append(self.parseDesc(len(self.abstracts)+1))
+            self.taskDesc = "" 
             
             if ci >= len(tasks):
                 break
@@ -265,30 +266,20 @@ class Calculator:
         self.notMatchToken = ""
         ab = Abstract(self.taskDesc, abi)
         ab.clear()
-        self.taskDesc += " enddesc"
-
+        self.taskDesc += " e"
         while self.readProgress < len(self.taskDesc):
-            print(self.notMatchToken, ",", self.taskDesc[self.readProgress:])
             if self.parsePlace(ab):
                 continue
             date = self.parseDate()
             if date:
-                ab.details[4] = date
+                if date.check():
+                    ab.details[4] = date
                 continue
             time = self.parseTime()
             if time:
                 ab.details[3] = time
                 continue
-            lat, lon = self.parseLocation()
-            if (lat, lon) != (None, None):
-                ab.details[5] = lon
-                ab.details[6] = lat
-                continue
-            gmt = self.parseGMT()
-            if gmt is not None:
-                ab.details[0] = gmt
-                continue
-            
+
             num, unit = self.parseAngleAltitude()
             if num and num != '':
                 if unit != "deg":
@@ -298,6 +289,18 @@ class Calculator:
                     ab.angles.append(num)
                 continue
 
+            lat, lon = self.parseLocation()
+            if (lon, lat) != (None, None):
+                if util.validLon(lon):
+                    ab.details[5] = lon
+                if util.validLat(lat):
+                    ab.details[6] = lat
+                continue
+            gmt = self.parseGMT()
+            if gmt is not None and gmt >= -12 and gmt <= 12:
+                ab.details[0] = gmt
+                continue
+            
             query = self.parseQuery()
             if query:
                 i = querySet[query]
@@ -306,11 +309,9 @@ class Calculator:
                         ab.negate = True
                     ab.queries.append(i)
                 continue
-            print(self.taskDesc[self.readProgress:], 2)
 
             self.notMatchToken = ""
 
-        self.taskDesc = ""
         ab.queryReduce()
         ab.formQuestion()
         return ab
@@ -476,7 +477,6 @@ class Calculator:
             return Time(int(fromHour)+fac*12, int(fromMinute), int(fromSecond), day)
         
         self.notMatchToken = t
-        # print(t,2)
         return None
     
     def parseLocation(self):
@@ -529,7 +529,6 @@ class Calculator:
             t = self.readToken()
             loc2 = toCoord(t)
 
-            print(loc1, loc2)
             if loc1[1] != '':  
                 if loc2 == ("", ''):
                     self.notMatchToken = t

@@ -7,7 +7,7 @@
     }
 </style>
 <body style="background-image: url('../static/Image/yearth.png');">
-    <h1 style="background-color: aqua;">Geolographical information finder</h1>
+    <h1 style="background-color: aqua;">Geographical information finder</h1>
    
     <form style="background-color: lightblue; text-indent:0%; width: max-content; padding: 10px;" action="/maps" method="post">
         <h2>Search a place (location, time zone...)</h2>
@@ -20,10 +20,10 @@
     </form>
     <div style="background-color:lightgoldenrodyellow; text-indent:0%; width: max-content;  padding: 10px;">
     <form action="/maps" method="post">
-        <h2>Register geographical information</h2>Place Name: <b><input type="text" name="location" value="{{location}}"></b><br>
-        Longitude: <input type="number" min="-180" max="180" name="Longitude">
+        <h2>Register geographical information</h2>Place name: <b><input type="text" name="location" value="{{location}}"></b><br>
+        Longitude: <input type="number" step="0.01" min="-180" max="180" name="Longitude">
         East<input type="radio" name="EW" value="East">; West<input type="radio" name="EW" value="West">
-        Latitude: <input type="number" min="-90" max="90" name="Latitude">
+        , Latitude: <input type="number" step="0.01" min="-90" max="90" name="Latitude">
         North<input type="radio" name="NS" value="North">; South<input type="radio" name="NS" value="South"><br>
         Time zone--GMT: <input type="number" min="-12" max="12" name="GMT"><br>
         <button type="submit">Register place</button>

@@ -1,5 +1,5 @@
 from calculator import Calculator
-from util import dbfile, readTable
+from util import dbfile, readTable, validLat, validLon
 
 
 def changeRecord(place, ln, info):
@@ -44,15 +44,17 @@ def updatePlace(place, ln, coordi, gmti):
     sc.readProgress = 0
     sc.notMatchToken = ""
     lat, lon = sc.parseLocation()
+    if not validLat(lat):
+        lat = ""
+    if not validLon(lon):
+        lon = ""
     sc.taskDesc = gmti
     sc.readProgress = 0
     sc.notMatchToken = ""
     gmt = sc.parseGMT()
-    info = place+",,,"
-    if (lat, lon) != (None, None):
-        info = place+','+str(lat)+','+str(lon)+','
-    if gmt != None:
-        info += str(gmt)
+    if gmt > 12 or gmt < -12:
+        gmt = ""
+    info = place+','+str(lat)+','+str(lon)+','+str(gmt)
     if info != ",,,":
         changeRecord(place, ln, info+'\n')
         

@@ -1,6 +1,6 @@
 import numpy as np
 from dateTime import Time, Date, mdays, dsecs
-seps = "~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n }"
+seps = "~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n\r }"
 dbfile = "static/db/places.csv"
 
 def readTable(fn, parse):
@@ -18,7 +18,13 @@ def readTable(fn, parse):
                     cct += '-'
             rows[pn][0] = cct
         else:
-            rows[pn][1] = showLat(float(rows[pn][1]))+', '+showLon(float(rows[pn].pop(2))) 
+            lat = rows[pn][1]
+            lon = rows[pn].pop(2)
+            rows[pn][1] = ""
+            if lat != "":
+                rows[pn][1] += showLat(float(lat)) + ", "
+            if lon != "":
+                rows[pn][1] += showLon(float(lon)) 
         rows[pn] = [pn+1]+rows[pn]
                 
     return rows
@@ -107,10 +113,10 @@ def toLatVal(num, ns):
     return num
 
 def validLat(lat):
-    return lat in range(-90, 91)
+    return lat is not None and lat >= -90 and lat <= 90
 
 def validLon(lon):
-    return lon in range(-180, 181)
+    return lon is not None and lon >= -180 and lon <= 180
 
 def findFloat(tok):
     dot = False
@@ -156,4 +162,3 @@ def directionClass(ang, rg):
         return "West"
     if ang >= 270+rg and ang <= 360-rg:
         return "Northwest"
-

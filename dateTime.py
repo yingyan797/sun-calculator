@@ -47,6 +47,12 @@ class Date:
             return (-1)*days
         return days
     
+    def check(self):
+        if self.month == 2:
+            return self.day <= 29
+        if self.month in range(1, 13):
+            return self.day <= mdays[self.month-1] 
+
     def show(self):
         return months[self.month-1]+" "+str(self.day)
 
