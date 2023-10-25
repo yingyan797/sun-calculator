@@ -1,6 +1,6 @@
 import numpy as np
 from model import sunDirectLatSin, noonSecs, horizonAngle
-from dateTime import dsecs
+from temporal import dsecs
 from util import toRad, toDeg, secondsToTime
 from sunPosition import sunHeightTimeLim
 

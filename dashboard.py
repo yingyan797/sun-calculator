@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-import calculator as sc
+import queryProcess as sc
 import record
 import util
 
@@ -123,22 +123,28 @@ def maps():
         ns = request.form.get('NS')
         gmt = request.form.get('GMT')
         table = record.registerPlace(loc, lon, lat, ew, ns, gmt)
+        calc.table = util.readTable(util.dbfile, True)
         return render_template('maps.html', location=loc, table=table)
     
     pn = 1
+    change = False
     while True:
         p = request.form.get("place"+str(pn))
         if p == None:
             break
         d = request.form.get("delete"+str(pn))
         if d:
+            change = True
             record.deletePlace(p)
         u = request.form.get("update"+str(pn))
         if u:
+            change = True
             c = request.form.get("coord"+str(pn))
             g = request.form.get("gmt"+str(pn))
             record.updatePlace(p, pn-1, c, g)
         pn += 1
+    if change:
+        calc.table = util.readTable(util.dbfile, True)
 
     return render_template('maps.html', table=util.readTable(record.dbfile, False))
 

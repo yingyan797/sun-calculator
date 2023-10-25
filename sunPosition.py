@@ -1,7 +1,7 @@
 import numpy as np
 import model
 import util
-from dateTime import Time,Date, dsecs
+from temporal import Time,Date, dsecs
 
 def triangular(lat, dlon):
     return [np.cos(lat),np.cos(dlon+np.pi/2),np.sin(lat),np.sin(dlon+np.pi/2)]

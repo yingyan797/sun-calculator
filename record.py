@@ -1,4 +1,4 @@
-from calculator import Calculator
+from queryProcess import Calculator
 from util import dbfile, readTable, validLat, validLon
 
 

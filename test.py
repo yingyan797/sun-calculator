@@ -1,6 +1,6 @@
 from sunTime import sunTimes, calcSun, sunTimeAltitude
 from sunPosition import sunPosition, sunHeightTimeLim, sunDirectionTimeLim
-from dateTime import Date, Time
+from temporal import Date, Time
 
 def timeTests():
     print("\n"+"--Vladivostok 0622--")

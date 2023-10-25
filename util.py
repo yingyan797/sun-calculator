@@ -1,5 +1,5 @@
 import numpy as np
-from dateTime import Time, Date, mdays, dsecs
+from temporal import Time, Date, mdays, dsecs
 seps = "~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n\r }"
 dbfile = "static/db/places.csv"
 

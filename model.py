@@ -1,7 +1,7 @@
 import numpy as np
 import util, model
 from util import toDeg, toRad, arcCap
-from dateTime import Date, Time, ydays, dsecs
+from temporal import Date, Time, ydays, dsecs
 
 
 axisAngle = toRad(23.5)

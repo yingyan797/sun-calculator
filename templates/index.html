@@ -98,9 +98,9 @@
                     Is the summary correct?
                     <input type="radio" name="adding" value="{{ab.num}}" form="details"><b>Add/Update details using the form | </b> 
                     <input type="submit" name="Calculate{{ab.num}}" value="Calculate"> |
-                    <input type="submit" name="Plot{{ab.num}}" value="Draw diagram">
-                    {% if ab.plot %}
-                    <textarea cols="80" rows="10">{{ab.plot}}</textarea>
+                    <input type="submit" name="Plot{{ab.num}}" value="Draw plot(s)">
+                    {% if ab.plots %}
+                    <textarea cols="80" rows="10">{{ab.plots[0].show()}}</textarea>
                     {% endif %}
                     {% if ab.response %}
                     <textarea readonly rows="4", cols="80">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea><br><br>
