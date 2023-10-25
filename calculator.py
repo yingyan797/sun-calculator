@@ -23,6 +23,7 @@ ms = ["m", "meter", "meters", "metre", "metres"]
 kms = ["km", "kilometer", "kilometers", "kilometre", "kilometres"]
 
 sunriseset = [(st.sunTimeAltitude, [6,5,0,4,9]), (st.sunTimes, [6,5,0,4])]
+risesetplot = [([6,5,0,9], 4), ([6,5,0], 4), ([6,5,0,4],9)]
 
 answerMap = {
     1: [(sp.sunHeight, [6,5,0,4,3])], 2: [(sp.sunPosition, [6,5,0,4,3])], 
@@ -31,15 +32,16 @@ answerMap = {
     7: sunriseset, 8: sunriseset, 0: [(model.thrTimeZone, [5])], 11: [(model.noonTime, [5, 0])]
 }
 
+plotMap = {
+    1: [([6,5,0,4], 3), ([6,5,0,3], 4)], 2: [([6,5,0,4], 3), ([6,5,0,3], 4)], 7: risesetplot, 8: risesetplot
+}
+
 class Abstract:
     def __init__(self, taskDesc, num):
         self.taskDesc = taskDesc
         self.num = num
         self.interpret = ""
-        self.conditions = []
         self.negate = False
-        self.response = []
-        self.place = None
 
     def clear(self):
         self.queries = []
@@ -48,7 +50,9 @@ class Abstract:
         self.interpret = ""
         self.conditions = []
         self.response = []
+        self.plot = None
         self.place = None
+        self.ivs = []
 
     def addDate(self, month, day):
         d = Date(int(month), int(day))
@@ -115,8 +119,11 @@ class Abstract:
                 self.interpret += " the sun is at "+str(self.details[1])+" degree above horizon?"
             if self.details[2]:
                 self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
-            
-        self.interpret += "--Given conditions:"
+        if self.ivs:
+            self.interpret += "Plotting over "+fields[self.ivs[0]]
+        for iv in self.ivs[1:]:
+            self.interpret +=  ", "+fields[iv]
+        self.interpret += " --Given conditions:"
         lat, lon = self.details[6], self.details[5]
         if lat != None and lon != None:
             self.conditions.append("Location: "+util.showLat(lat)+", "+util.showLon(lon))
@@ -139,7 +146,22 @@ class Abstract:
             self.conditions.append(c)
         if self.details[9]:
             self.conditions.append(fields[9]+": "+str(self.details[9])+self.details[10])
-    
+
+    def formPlot(self):
+        self.plot = []
+        for q in self.queries:
+            if q in plotMap:
+                for (ms, iv) in plotMap[q]:
+                    complete = True
+                    for m in ms:
+                        if self.details[m] is None:
+                            complete = False
+                            break
+                    if complete:
+                        select = (ms, iv)
+                        self.plot.append(select)
+
+
     def formResponse(self):
         self.response = []
         if self.details[10] == "km":
@@ -150,7 +172,7 @@ class Abstract:
             for m in maps:
                 mg = []
                 for cond in m[1]:
-                    if not self.details[cond]:
+                    if self.details[cond] is None:
                         mg.append(cond)
                 if mg != []:
                     missing.append(mg)
@@ -303,11 +325,14 @@ class Calculator:
             
             query = self.parseQuery()
             if query:
-                i = querySet[query]
-                if i not in ab.queries:
-                    if query == "below":
-                        ab.negate = True
-                    ab.queries.append(i)
+                if query.isdigit() and int(query) not in ab.ivs:
+                    ab.ivs.append(int(query))
+                else:
+                    i = querySet[query]
+                    if i not in ab.queries:
+                        if query == "below":
+                            ab.negate = True
+                        ab.queries.append(i)
                 continue
 
             self.notMatchToken = ""
@@ -604,6 +629,14 @@ class Calculator:
             self.notMatchToken = ""
             return t
             
+        elif t in ["versus", "vs", "over", "about", "regarding", "each", "every"]:
+            t = self.readToken()
+            if t in querySet:
+                iv = querySet[t] 
+                if iv in [3,4,9,6]:
+                    self.notMatchToken = ""
+                    return str(iv)
+
         self.notMatchToken = t
         return None
             

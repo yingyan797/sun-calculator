@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request,session, redirect, flash, jsonify
+from flask import Flask, render_template, request
 import calculator as sc
 import record
 import util
@@ -42,6 +42,13 @@ def index():
         if 11 not in abf.queries and request.form.get("Noon") == 'on':
             abf.queries.append(11)
             emptyForm = False 
+
+        ps = ["PTime", "PDate", "PLat", "PAlt"]
+        ivs = [3,4,6,9]
+        for i in range(len(ps)):
+            if ivs[i] not in abf.ivs and request.form.get(ps[i]) == 'on':
+                abf.ivs.append(ivs[i])
+                emptyForm = False
 
         lon = request.form.get('Longitude') 
         ew = request.form.get('EW')
@@ -101,6 +108,8 @@ def index():
             calc.abstracts[abi] = calc.parseDesc(ab.num)
         elif request.form.get("Calculate"+str(ab.num)):
             calc.abstracts[abi].formResponse()
+        elif request.form.get("Plot"+str(ab.num)):
+            calc.abstracts[abi].formPlot()        
 
     return render_template('index.html', abstracts=calc.abstracts)
 
@@ -138,6 +147,10 @@ def maps():
 @app.route('/information', methods=['GET', 'POST']) # show the main page
 def infomation():
     return render_template('info.html', info=request.form.get('info'))
+
+@app.route('/plot', methods=['GET', 'POST']) # show the main page
+def plot():
+    return render_template('plot.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5005, debug=True)
