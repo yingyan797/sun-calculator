@@ -114,5 +114,7 @@ class Time:
             d = " <"+str(self.day)+" day after>"
         if self.day < 0:
             d = " <"+str(-self.day)+" day before>"
+        if s == "00":
+            return h+":"+m
         return h+":"+m+":"+s+d
     
