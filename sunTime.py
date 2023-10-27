@@ -6,7 +6,7 @@ from sunPosition import sunHeightTimeLim
 
 def daytimeBalance(date, lat):
     pss = sunDirectLatSin(date)
-    sbs = np.tan(toRad(lat)) * pss / np.sqrt(1-pow(pss,2))
+    sbs = np.tan(lat) * pss / np.sqrt(1-pow(pss,2))
     if sbs > 1:
         return 90
     if sbs < -1:
@@ -19,7 +19,7 @@ def dayLength(date, lat):
 # Main formula to calculate sunrise&sunset times
 def sunTimes(args):
     # lat, lon, gmt, date
-    hdl = dayLength(args[3], args[0])/2
+    hdl = dayLength(args[3], toRad(args[0]))/2
     noon = noonSecs(args[2], args[1])
     return secondsToTime(noon-hdl).show(), secondsToTime(noon+hdl).show()
 

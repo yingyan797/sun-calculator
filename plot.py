@@ -70,6 +70,48 @@ def drawPlot(xs, ys, t, xl, yl):
     plt.savefig(gfile)
     plt.clf()
 
+def riseSetPlot(xs, tr, ts, xl,t):
+    fig, ax1 = plt.subplots()
+    ax1.set_title(t)
+    ax1.set_xlabel(xl)
+    ax1.set_ylabel("Sunrise time (s)")
+    ax2 = ax1.twinx()
+    ax2.set_ylabel("Sunset time (s)")
+    ax1.plot(xs, tr)
+    ax2.plot(xs, ts)
+    ax1.set_yticklabels([])
+    ax2.set_yticklabels([])
+    ly = min(tr)
+    uy = max(tr)
+    ly2 = min(ts)
+    uy2 = max(ts)
+    unit = (uy-ly)/20
+    timeStep = 1800
+    if xl == labels[4]:
+        ax1.set_yticklabels([])
+        ax2.set_yticklabels([])
+        ax1.annotate("Sunrise",(51,tr[50]))
+        ax2.annotate("Sunset",(51,ts[50]))
+        for (d,t) in dateAnno:
+            ax1.axvline(d)
+            ax1.annotate(t,(d,ly-unit))
+        for (d,t) in vertAnno:
+            ax1.annotate(t,(d,tr[d-1]),(d-5,tr[d-1]+3*unit),arrowprops={"headwidth": 1, "width":0.5})
+            ax2.annotate(t,(d,ts[d-1]),(d+2,ts[d-1]+2*unit),arrowprops={"headwidth": 1, "width":0.5})
+    elif xl == "Altitude (km)":
+        timeStep = 600
+        ax1.annotate("Sunrise",(xs[10],tr[10]))
+        ax2.annotate("Sunset",(xs[10],ts[10]))
+    for t in range(-7200,150000,timeStep):
+        if t >= ly - timeStep/3 and t <= uy+timeStep/3:
+            ax1.annotate(util.secondsToTime(t).show(), (-0.5,t))
+            ax1.axhline(t,0,0.6)
+    for t in range(-7200,150000,timeStep):
+        if t >= ly2 - timeStep/3 and t <= uy2+timeStep/3:
+            ax2.annotate(util.secondsToTime(t).show(), (xs[-10],t))
+            ax2.axhline(t,0.4,1)
+    
+
 class Plot:
     def __init__(self, queries, fields):
         self.queries = queries
@@ -143,33 +185,24 @@ class Plot:
                             hdl = st.dayLength(util.daysToDate(d), lat)/2
                             rises[d-1] = noon-hdl
                             sets[d-1] = noon + hdl
-                        plt.title("Sunrise and sunset times every day of the year")
-                        fig, ax1 = plt.subplots()
-                        ax2 = ax1.twinx()
-                        ax1.plot(dates,rises)
-                        ax2.plot(dates,sets)
+                        riseSetPlot(dates,rises,sets,labels[4],"Sunrise and sunset times every day of the year")
                         plt.savefig(rsDate)
                     case 4:
                         ang = model.horizonAngle(self.args[3])
             elif self.iv == 9:
                 alts = [[a/10 for a in range(0,150)], [a for a in range(0,200,2)]]
-                rise = [np.zeros(len(alts[0])),np.zeros(len(alts[1]))]
-                set = [np.zeros(len(alts[0])),np.zeros(len(alts[1]))]
+                rises = [np.zeros(len(alts[0])),np.zeros(len(alts[1]))]
+                sets = [np.zeros(len(alts[0])),np.zeros(len(alts[1]))]
                 sinlat0 = model.sunDirectLatSin(self.args[3])
                 for j in [0,1]:
                     a = alts[j]
                     for i in range(len(a)):
                         ang = util.toRad(model.horizonAngle(a[i]*1000))
-                        print(ang,j)
                         tr = model.approachTime(sinlat0,lat,noon,sp.sunht,noon-dsecs/2, noon, ang)
                         ts = 2*noon-tr
-                        rise[j][i] = tr
-                        set[j][i] = ts
-                    plt.title("Sunrise and sunset times for different altitudes on "+self.args[3].show())
-                    fig, ax1 = plt.subplots()
-                    ax2 = ax1.twinx()
-                    ax1.plot(a,rise[j])
-                    ax2.plot(a,set[j])
+                        rises[j][i] = tr
+                        sets[j][i] = ts
+                    riseSetPlot(a,rises[j],sets[j],"Altitude (km)","Sunrise and sunset times for different altitudes on "+self.args[3].show())
                     plt.savefig(rsAltitude[j])
                     plt.clf()
 
@@ -189,6 +222,7 @@ class Plot:
     
 p = Plot([7,8], ["Time zone--GMT", "Sun height angle", "Sun direction angle", "Local time","Date", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation", "","Solar noon"])
 # p.loadMap([51, -0.1, 1, Date(7,4)], 3)
-p.loadMap([51, -0.1, 1, Date(7,4)], 9)
+# p.loadMap([35, 112, 8, Date(7,4)], 9)
+p.loadMap([35, 112, 8], 4)
 print(p.show())
 print(p.draw())
