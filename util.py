@@ -162,3 +162,9 @@ def directionClass(ang, rg):
         return "West"
     if ang >= 270+rg and ang <= 360-rg:
         return "Northwest"
+    
+def direcctionHalf(rad):
+    if rad <= np.pi:
+        return toDeg(rad)
+    return toDeg(2*np.pi - rad)
+
