@@ -24,8 +24,8 @@
     </style>
 </head>
 
-<body style="background-image: url('../static/Image/yearthy.png');">
-    <!-- style="background-image: url('../static/Image/yearthy.png');" -->
+<body style="background-image: url('../static/yearth.png');">
+    <!-- style="background-image: url('../static/yearth.png');" -->
     <h1 align="center">Y-EARTH | Interactive Sun Calculator 交互式太阳时空信息计算器</h1>
     <div class="row">
         <div class="column" style="background-color:lightgoldenrodyellow;">
@@ -48,7 +48,7 @@
             </form>
             <form action="/" method="post" id="details">
                 <h2>Alternatively, fill in the details of requirements.</h2>
-                <b>--Select 1 or more to calculate/plot on y-axis--</b><br>
+                <b>--Select 1 or more to calculate/plot as dependent variable(s)--</b><br>
                 Sunrise<input type="checkbox" name="Sunrise">
                 ; Sunset<input type="checkbox" name="Sunset">
                 ; Solar Noon<input type="checkbox" name="Noon">
@@ -58,7 +58,7 @@
                 ; Local Time<input type="checkbox" name="QTime">
                 ; Time Zone<input type="checkbox" name="TZ">
                 ; Latitude<input type="checkbox" name="QLat">
-                <br><b>**For plotting only** What is the independent variable (on x-axis)?</b><br>
+                <br><b>**For plotting only** What is the independent variable?</b><br>
                 Date<input type="checkbox" name="PDate">
                 ; Local Time<input type="checkbox" name="PTime">
                 ; Latitude<input type="checkbox" name="PLat">
@@ -87,7 +87,7 @@
             <form action="/" method="post">
                 <h2>Summary, calculation, and visualization
                 <button type="submit">Refresh All</button></h2>
-
+                
                 {% for ab in abstracts %}
                     <b>-- Question {{ab.num}} -- </b><input type="submit" name="Reset{{ab.num}}" value="Resubmit"><br>
                     <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea>

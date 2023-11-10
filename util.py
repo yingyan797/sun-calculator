@@ -167,4 +167,3 @@ def direcctionHalf(rad):
     if rad <= np.pi:
         return toDeg(rad)
     return toDeg(2*np.pi - rad)
-

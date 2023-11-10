@@ -33,7 +33,6 @@ class Abstract:
         self.interpret = ""
         self.conditions = []
         self.response = []
-        self.plots = None
         self.place = None
         self.ivs = []
 
@@ -144,7 +143,7 @@ class Abstract:
                     return (ms, iv), None
             return None, missing
 
-        plots = [Plot([], fields) for i in range(2)]
+        plots = [Plot([], fields, self) for i in range(2)]
         ps = [1,2,7,8]
         pflag = [False, False]
         for q in self.queries:
@@ -163,9 +162,10 @@ class Abstract:
                         plots[i].over = pmap[1]
                     else:
                         plots[i].miss = miss
-        self.plots = plots
-        return plots                    
-
+        plotNames = []
+        for plot in plots:
+            plotNames += plot.draw()
+        return plotNames
 
     def formResponse(self):
         self.response = []

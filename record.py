@@ -69,6 +69,9 @@ def deletePlace(place):
     f.writelines(lines)
     f.close()
 
+def downloadPlot(plotType, plotNum):
+    f = open()
+
 # print(registerPlace("soigih", "120", "35", "East", "North", "8"))
 # print(registerPlace("london", "0.1", "51", "West", "North", "1"))
 # print(updatePlace("iafk", 1, "51n `20w", "-2"))
