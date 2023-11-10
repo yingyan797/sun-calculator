@@ -24,11 +24,13 @@ class Calculator:
     def __init__(self, seps=util.seps):
         self.seps = seps
         self.taskDesc = ""
+        self.abi = None
         self.abstracts = []
     
     def parseTask(self, tasks):
         ci = 0
         self.abstracts = []
+        self.abi = None
         while True:
             if ci < len(tasks):
                 c = tasks[ci]

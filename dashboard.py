@@ -109,9 +109,25 @@ def index():
         elif request.form.get("Calculate"+str(ab.num)):
             calc.abstracts[abi].formResponse()
         elif request.form.get("Plot"+str(ab.num)):
-            calc.abstracts[abi].formPlot()        
+            calc.abstracts[abi].formPlot()      
 
-    return render_template('index.html', abstracts=calc.abstracts)
+    abi = request.form.get("abiEnter")
+    if not abi:
+        abi = request.form.get("abiClick")
+        if not abi:
+            if not calc.abi:
+                abi = 1
+            elif request.form.get("abip"):
+                abi = (calc.abi - 1) % len(calc.abstracts)
+            elif request.form.get("abin"):
+                abi = (calc.abi + 1) % len(calc.abstracts)
+    if abi is not None:
+        if abi == 0:
+            calc.abi = len(calc.abstracts)
+        else:
+            calc.abi = int(abi)
+        
+    return render_template('index.html', abstracts=calc.abstracts, abnum=len(calc.abstracts), abi=calc.abi)
 
 @app.route('/maps', methods=['GET', 'POST']) # show the main page
 def maps():

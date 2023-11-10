@@ -43,7 +43,7 @@
             <form action="/" method="post" id="questions">
                 <h2>Describe all requirements for calculation/plotting</h2>
                 <b>--Write any number of requirements, starting each one in a new line--</b><br>
-                <textarea name="taskDesc" rows="4" cols="85"></textarea><br><br>     
+                <textarea name="taskDesc" rows="4" cols="85"></textarea><br><br>
                 <button type="submit">Summarize descriptions>></button>
             </form>
             <form action="/" method="post" id="details">
@@ -84,28 +84,37 @@
 
         </div>
         <div class="column" style="background-color:aquamarine;">
+            <h2>Summary, calculation, and visualization</h2>
+            {% if abstracts %}
             <form action="/" method="post">
-                <h2>Summary, calculation, and visualization
-                <button type="submit">Refresh All</button></h2>
-                
-                {% for ab in abstracts %}
-                    <b>-- Question {{ab.num}} -- </b><input type="submit" name="Reset{{ab.num}}" value="Resubmit"><br>
-                    <textarea name="Question{{ab.num}}" cols="85" rows="2">{{ab.taskDesc}}</textarea>
-                    Summary: <b>{{ab.interpret}}</b><br>
-                    {% for cond in ab.conditions %}
-                        <b style="padding: 25px;">*  {{cond}}</b><br>
-                    {% endfor %}
-                    Is the summary correct?
-                    <input type="radio" name="adding" value="{{ab.num}}" form="details"><b>Add/Update details using the form | </b> 
-                    <input type="submit" name="Calculate{{ab.num}}" value="Calculate"> |
-                    <input type="submit" name="Plot{{ab.num}}" value="Draw plot(s)">
-                    {% if ab.plots %}
-                    <textarea cols="80" rows="10">{{ab.plots[0].show()}}</textarea>
-                    {% endif %}
-                    {% if ab.response %}
-                    <textarea readonly rows="4", cols="80">{% for resp in ab.response %}{{resp}}{% endfor %}</textarea><br><br>
-                    {% endif %}
+                Select or enter which question to show (1-{{abnum}}) 
+                <input type="number" name="abiEnter" min="1" max="{{abnum}}"><button type="submit">Confirm</button><br>
+                Jump to question: <input type="submit" name="abip" value="<previous">
+                {% for ab in abstracts[:5]%}
+                    <input type="submit" name="abiClick" value="{{ab.num}}">
                 {% endfor %}
+                 ... <input type="submit" name="abin" value="next>">
+            </form>
+            <form action="/" method="post">
+                <h3>-- Showing Question {{abi}} -- <input type="submit" name="Reset{{abi}}" value="Resubmit question"></h3>
+                
+                <textarea name="Question{{abi}}" cols="85" rows="2">{{abstracts[abi-1].taskDesc}}</textarea>
+                Summary: <b>{{abstracts[abi-1].interpret}}</b><br>
+                {% for cond in abstracts[abi-1].conditions %}
+                    <b style="padding: 25px;">*  {{cond}}</b><br>
+                {% endfor %}
+                Is the summary correct?
+                <input type="radio" name="adding" value="{{abi}}" form="details"><b>Add/Update details using the form | </b> 
+                <input type="submit" name="Calculate{{abi}}" value="Calculate"> |
+                <input type="submit" name="Plot{{abi}}" value="Draw plot(s)">
+            </form>
+                {% if abstracts[abi-1].plots %}
+                <textarea cols="80" rows="10">{{abstracts[abi-1].plots[0].show()}}</textarea>
+                {% endif %}
+                {% if abstracts[abi-1].response %}
+                <textarea readonly rows="4", cols="80">{% for resp in abstracts[abi-1].response %}{{resp}}{% endfor %}</textarea><br><br>
+                {% endif %}
+            {% endif %}
             </form>
         </div>
     </div>
