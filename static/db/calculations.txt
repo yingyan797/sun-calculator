@@ -1,0 +1,3 @@
+At London, what time does sunrise occur?  --Given conditions:
+Location: 51.5N 0.1W, Date: July 4, Time zone GMT: +1, 
+Sunrise time: 04:52:41,

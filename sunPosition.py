@@ -60,8 +60,8 @@ def sunHeightTimeLim(args):
     t1 = model.approachTime(sinlat0, lat, noon, sunht, noon-dsecs/2, noon, ht)
     t2 = 2*noon-t1
     if t1 != t2:
-        return util.secondsToTime(t1).show(), util.secondsToTime(t2).show()  
-    return util.secondsToTime(t1).show()
+        return util.secondsToTime(t1).__str__(), util.secondsToTime(t2).__str__()  
+    return util.secondsToTime(t1).__str__()
 
 def sunDirectionTimeLim(args):
     # lat, lon, gmt, date, ort
@@ -69,7 +69,7 @@ def sunDirectionTimeLim(args):
     lat = util.toRad(args[0])
     noon = model.noonSecs(args[2], args[1])
     t = model.approachTime(model.sunDirectLatSin(args[3]), lat, noon, sungeom, noon-dsecs/2, noon+dsecs/2, ort)
-    return util.secondsToTime(t).show()
+    return util.secondsToTime(t).__str__()
 
 def sunDateLim(args):
     # lat, lon, gmt, time, ang, hod
@@ -80,7 +80,7 @@ def sunDateLim(args):
     if not args[5]:
         calc = sungeom
     ds = model.approachDate(lat, noon, [], args[3], calc, ang)
-    return [d.show() for d in ds]   
+    return [d.__str__() for d in ds]   
 
 
 def sunLatLim(args):
@@ -88,6 +88,6 @@ def sunLatLim(args):
     sinlat0 = model.sunDirectLatSin(args[2])
 
 # t1, t2 = sunHeightTimeLim(30, 120, 8, Date(6,15), 50)
-# print(t1.show(), t2.show())
+# print(t1.__str__(), t2.__str__())
 # print(sunPosition(30, 120, 8, Date(6,15), t1))
 # print(sungeom(0, 0, [0]))

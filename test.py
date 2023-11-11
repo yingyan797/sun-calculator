@@ -17,12 +17,12 @@ def posTime():
     for h in range(12,15):
         for m in range(60):
           time = Time(h,m,0,0)
-          print(time.show(),"--",sunPosition(51, 0, 1, Date(6,22), time))
+          print(time.__str__(),"--",sunPosition(51, 0, 1, Date(6,22), time))
 
 def posDate():
     for d in range(30):
         date = Date(6, d)
-        print(date.show(),"--",sunPosition(51, 0, 1, date, Time(15,0,0,0)))
+        print(date.__str__(),"--",sunPosition(51, 0, 1, date, Time(15,0,0,0)))
 
 def posLocation():
     for lat in range(55):
@@ -30,14 +30,14 @@ def posLocation():
         
 def timeHeightLimitTest():
     t1, t2 = sunHeightTimeLim(39.5, 113.5, 8, Date(7,21), 30)
-    print(t1.show(), t2.show())
+    print(t1.__str__(), t2.__str__())
 
 def timeDirectionLimitTest():
-    print(sunDirectionTimeLim(39.5,113.5,8, Date(7,21), 45).show(), sunDirectionTimeLim(39.5,113.5,8, Date(7,21), 180).show())
+    print(sunDirectionTimeLim(39.5,113.5,8, Date(7,21), 45).__str__(), sunDirectionTimeLim(39.5,113.5,8, Date(7,21), 180).__str__())
 
 def altitudeSuntimeTest():
     t1,t2 = sunTimeAltitude(51,0,1,Date(6,22), 100000)
-    print(t1.show(), t2.show())
+    print(t1.__str__(), t2.__str__())
 
 def dateHeightLimitTest():
     print()
@@ -55,7 +55,7 @@ def tabulate():
         times = []
         for i in range(3):
             sr, ss = sunTimes(lats[i], lons[i], gmts[i][j], dates[j])
-            times.append(sr.show()+","+ss.show())
+            times.append(sr.__str__()+","+ss.__str__())
         data.append(times)
         
     sunTable = pd.DataFrame(data, indexes, cols)

@@ -2,17 +2,23 @@
     <title>Information</title>
 </head>
 <body>
-    <h1 style="background-color: skyblue;">About Sun Calculator</h1>
-    <p>Page under development...</p>
-    {% if info == "User guide" %}
-    <h2>Help Center</h2>
-    {% endif %}
-
+    <h1 style="background-color: skyblue;">
+        {% if info != "User guide" %}
+        <a href="/">Sun Calculator</a> |  About Sun Calculator
+        {% else %}
+        Help center
+        {% endif %}
+    </h1>
+       
     {% if info == "More information" %}
     <h2>Software Information</h2>
-    {% endif %}
 
-    {% if info == "Contact us" %}
+    {% elif info == "Contact us" %}
     <h2>Contact Us</h2>
+    Author: Xinyang (Andy) Chen, 3rd year computer science student at Imperial College London <br>
+    <a href="https://github.com/yingyan797/sun-calculator" target="_blank">Source code github link</a><br>
+    <a href="https://www.linkedin.com/in/xinyang-chen-a55645236/" target="_blank">LinkedIn profile</a>
+    {% else %}
+    <h2>How to use Sun Calculator?</h2>
     {% endif %}
 </body>

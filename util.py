@@ -1,33 +1,6 @@
 import numpy as np
 from temporal import Time, Date, mdays, dsecs
 seps = "~`!@#$%^&*()_+={[]|\\:;<,>?/'\"\n\r }"
-dbfile = "static/db/places.csv"
-
-def readTable(fn, parse):
-    f = open(fn, "r")
-    lines = f.readlines()
-    f.close()
-    rows = [l[:-1].split(",") for l in lines]
-    for pn in range(len(rows)):
-        if parse:
-            cct = ""
-            for c in rows[pn][0]:
-                if c not in seps:
-                    cct += c
-                else:
-                    cct += '-'
-            rows[pn][0] = cct
-        else:
-            lat = rows[pn][1]
-            lon = rows[pn].pop(2)
-            rows[pn][1] = ""
-            if lat != "":
-                rows[pn][1] += showLat(float(lat)) + ", "
-            if lon != "":
-                rows[pn][1] += showLon(float(lon)) 
-        rows[pn] = [pn+1]+rows[pn]
-                
-    return rows
 
 def arcCap(ac):
     if ac > 1:

@@ -24,30 +24,33 @@
     </style>
 </head>
 
-<body style="background-image: url('../static/yearth.png');">
-    <!-- style="background-image: url('../static/yearth.png');" -->
+<body style="background-image: url('../static/Image/yearth.png');">
+    <!-- style="background-image: url('../static/Image/yearth.png');" -->
     <h1 align="center">Y-EARTH | Interactive Sun Calculator 交互式太阳时空信息计算器</h1>
     <div class="row">
         <div class="column" style="background-color:lightgoldenrodyellow;">
-            <form action="/information" method="post" target="_blank">
-                <input type="submit" name="info" value="User guide">
+            <form action="/information" id="guide" method="post" target="_blank"></form>
+            <form action="/information" method="post">
+                <input type="submit" name="info" form="guide" value="User guide">
                 <input type="submit" name="info" value="More information">
                 <input type="submit" name="info" value="Contact us">
             </form> 
-            <form action="/maps" method="post" target="_blank" name="place">
+            <form action="/maps" method="post" name="place">
                 <label for="location">Find or register a place</label>
                 <input type="text" name="location">
                 <button type="submit">Continue</button>
-                <a href="/maps" target="_blank"><b>See registered places</b></a>
+                <a href="/maps"><b>See registered places</b></a>
             </form>
             <form action="/" method="post" id="questions">
                 <h2>Describe all requirements for calculation/plotting</h2>
-                <b>--Write any number of requirements, starting each one in a new line--</b><br>
-                <textarea name="taskDesc" rows="4" cols="85"></textarea><br><br>
-                <button type="submit">Summarize descriptions>></button>
+                - Upload a file of descriptions (.txt from "static/questions/") <input type="file" name="qfile"><br>
+                - Or write all requirements here, each one in a new line: </b><br>
+                <textarea name="taskDesc" rows="5" cols="85">{% if tasks %}{{tasks}}{% endif %}</textarea><br>
+                <input type="submit" name="clearDesc" value="Clear and write again">
+                <button type="submit"><b>Summarize file/texts>></b></button>
             </form>
             <form action="/" method="post" id="details">
-                <h2>Alternatively, fill in the details of requirements.</h2>
+                <h2>Alternatively, fill in the details manually.</h2>
                 <b>--Select 1 or more to calculate/plot as dependent variable(s)--</b><br>
                 Sunrise<input type="checkbox" name="Sunrise">
                 ; Sunset<input type="checkbox" name="Sunset">
@@ -84,38 +87,50 @@
 
         </div>
         <div class="column" style="background-color:aquamarine;">
-            <h2>Summary, calculation, and visualization</h2>
+            <form action="/history" method="post">
+            <h2>Summarization and Results
+                <input type="submit" name="mode" value="Show plot history">
+                <input type="submit" name="mode" value="Show calculation history"></h2>
+            </form>
             {% if abstracts %}
             <form action="/" method="post">
-                Select or enter which question to show (1-{{abnum}}) 
-                <input type="number" name="abiEnter" min="1" max="{{abnum}}"><button type="submit">Confirm</button><br>
-                Jump to question: <input type="submit" name="abip" value="<previous">
-                {% for ab in abstracts[:5]%}
-                    <input type="submit" name="abiClick" value="{{ab.num}}">
+                <!-- Which question to show (1 - {{abis["abnum"]}}) 
+                <input type="number" name="abiEnter" min="1" max="{{abis["abnum"]}}"><button type="submit">Confirm</button><br> -->
+                <b>Select which question to display [1-{{abis["abnum"]}}]</b><br>
+                <input type="submit" name="abip" value="<previous">
+                {% for i in abis["display"]%}
+                {% if i <= 0 %}
+                ...
+                {% else %}
+                    <input type="submit" name="abiClick" value="{{i}}">
+                {% endif %}
                 {% endfor %}
-                 ... <input type="submit" name="abin" value="next>">
+                <input type="submit" name="abin" value="next>"> ; Or jump to 
+                <input type="number" name="abiEnter" min="1" max="{{abis["abnum"]}}"><button type="submit">Confirm</button><br>
             </form>
             <form action="/" method="post">
-                <h3>-- Showing Question {{abi}} -- <input type="submit" name="Reset{{abi}}" value="Resubmit question"></h3>
+                <h3>-- Showing Question {{abis["abi"]}} -- <input type="submit" name="Reset{{abis["abi"]}}" value="Resummarize"></h3>
                 
-                <textarea name="Question{{abi}}" cols="85" rows="2">{{abstracts[abi-1].taskDesc}}</textarea>
-                Summary: <b>{{abstracts[abi-1].interpret}}</b><br>
-                {% for cond in abstracts[abi-1].conditions %}
-                    <b style="padding: 25px;">*  {{cond}}</b><br>
+                <textarea name="Question{{abis["abi"]}}" cols="85" rows="2">{{abstracts[abis["abi"]-1].taskDesc}}</textarea>
+                - Please check the summary of this question: <br><b>{{abstracts[abis["abi"]-1].interpret}}</b><br>
+                {% for k,v in abstracts[abis["abi"]-1].conditions.items() %}
+                    <b style="padding: 25px;">*  {{k}}: {{v}}</b><br>
                 {% endfor %}
-                Is the summary correct?
-                <input type="radio" name="adding" value="{{abi}}" form="details"><b>Add/Update details using the form | </b> 
-                <input type="submit" name="Calculate{{abi}}" value="Calculate"> |
-                <input type="submit" name="Plot{{abi}}" value="Draw plot(s)">
+                - Are all the details correct?<br>
+                <input type="radio" name="adding" value="{{abis["abi"]}}" form="details"><b>Add/Update details using the form | </b> 
+                <input type="submit" name="Calculate{{abis["abi"]}}" value="Calculate"> |
+                <input type="submit" name="Plot{{abis["abi"]}}" value="Draw plot(s)">
             </form>
-                {% if abstracts[abi-1].plots %}
-                <textarea cols="80" rows="10">{{abstracts[abi-1].plots[0].show()}}</textarea>
-                {% endif %}
-                {% if abstracts[abi-1].response %}
-                <textarea readonly rows="4", cols="80">{% for resp in abstracts[abi-1].response %}{{resp}}{% endfor %}</textarea><br><br>
+                {% for info in abstracts[abis["abi"]-1].plotInfo %}
+                <textarea cols="80" rows="4">{{info}}</textarea>
+                {% endfor %}
+                {% for pn in abstracts[abis["abi"]-1].plotNums %}
+                <img src="static/plots/{{pn}}.png" alt="plot">
+                {% endfor %}
+                {% if abstracts[abis["abi"]-1].response %}
+                <textarea readonly rows="4", cols="80">{% for resp in abstracts[abis["abi"]-1].response %}{{resp}}{% endfor %}</textarea><br><br>
                 {% endif %}
             {% endif %}
-            </form>
         </div>
     </div>
 </body>

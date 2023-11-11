@@ -1,0 +1,77 @@
+<head>
+    <title>History</title>
+    <style>
+        /* Create two equal columns that floats next to each other */
+        .column {
+        float: left;
+        width: 50%;
+        padding: 25px;
+        /* height: 300px; Should be removed. Only for demonstration */
+        }
+        
+        /* Clear floats after the columns */
+        .row:after {
+        content: "";
+        display: table;
+        clear: both;
+        }
+    </style>
+</head>
+<body>
+    <form action="/history" method="post">
+        <h1 style="background-color: lightsalmon;"><a href="/">Sun Calculator</a> | Plot and calculation history 
+        <input type="submit" name="mode" value="Show plot history">
+        <input type="submit" name="mode" value="Show calculation history">
+    </form></h1>
+    {% if mode == "Show plot history" %}
+        <form action="/history" method="post">
+            <b>-- Showing all {{num}} plots --</b>
+            <input type="submit" name="clearGraphs" value="Clear all graphics">
+        </form>
+    {% else %}
+        <form action="/history" method="post">
+            <b>-- Showing all {{num}} calculations --</b>
+            <input type="submit" name="clearCalcs" value="Clear all calculations">
+        </form>
+    {% endif %}
+    <div class="row">
+        <div class="column">
+            {% if mode == "Show plot history" %}
+                {% for h in hpair[0] %}
+                <b>Plot {{h["Num"]}}: </b>{{h["plotType"]}} <br>
+                {% for i in h["plotInfo"] %}
+                {{i}}, 
+                {% endfor %}
+                <br><img src="{{h["plotName"]}}" alt="plot"><br>
+                {% endfor%}
+            {% else %}
+                {% for h in hpair[0] %}
+                <b>Calculation no.{{h["Num"]}}</b><br>
+                Question: {{h["Question"]}} <br>
+                {{h["Conditions"]}}<br>
+                <textarea cols="50" rows="2">{{h["Result"]}}</textarea><br>
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="column">
+            {% if mode == "Show plot history" %}
+                {% for h in hpair[1] %}
+                <b>Plot {{h["Num"]}}: </b>{{h["plotType"]}} <br>
+                {% for i in h["plotInfo"] %}
+                {{i}}, 
+                {% endfor %}
+                <br><img src="{{h["plotName"]}}" alt="plot"><br>
+                {% endfor%}
+            {% else %}
+                {% for h in hpair[1] %}
+                <b>Calculation no.{{h["Num"]}}</b><br>
+                Question: {{h["Question"]}} <br>
+                Conditions: {{h["Conditions"]}} <br>
+                <textarea cols="50" rows="2">{{h["Result"]}}</textarea><br>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+
+</body>

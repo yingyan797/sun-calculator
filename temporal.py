@@ -53,7 +53,7 @@ class Date:
         if self.month in range(1, 13):
             return self.day <= mdays[self.month-1] 
 
-    def show(self):
+    def __str__(self) -> str:
         return months[self.month-1]+" "+str(self.day)
 
 
@@ -99,7 +99,7 @@ class Time:
     def toSecs(self):
         return self.day*dsecs + self.hour*3600 + self.minute*60 + self.second
     
-    def show(self):
+    def __str__(self) -> str:
         m = str(self.minute)
         s = str(int(self.second))
         h = str(self.hour)
@@ -117,4 +117,3 @@ class Time:
         if s == "00":
             return h+":"+m
         return h+":"+m+":"+s+d
-    

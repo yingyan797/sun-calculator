@@ -4,9 +4,10 @@ import model, util
 from temporal import Date, Time, dsecs
 import numpy as np
 import matplotlib.pyplot as plt
+import record
 
-plotFiles = ["static/plots/"+fn for fn in 
-             ["heightTime","heightDate","directionTime","directionDate","rsDate","rsAltitude1","","rsAltitude2"]]
+plotPref = "static/plots/"
+plotTypes = ["heightTime","heightDate","directionTime","directionDate","rsDate","rsAltitude1","","rsAltitude2"]
 labels = ["","Sun height angle (degree)","Sun direction (from north)","Local time (s)","Date (days from January 1)"]
 heightAnno = [(0, "Sunrise/set"), (-6, "Civil twl."), (-12, "Naut. twl."), (-18, "Astr. twl.")]
 directionAnno1 = [(0, "North"), (45, "NE/NW"), (90, "East/West"), (135, "SE/SW"), (180, "South")]
@@ -16,7 +17,7 @@ dateAnno = [(1,"Jan"),(32,"Feb"),(60,"March"),(91,"April"),(121,"May"),(152,"Jun
 vertAnno = [(80,"Spring Eq."),(173,"Summer So."),(266,"Autumn Eq."),(356,"Winter So.")]
 
 
-def drawPlot(xs, ys, t, xl, yl):
+def drawPlot(xs, ys, xl, yl, t):
     plt.title(t)
     plt.xlabel(labels[xl])
     plt.ylabel(labels[yl])
@@ -38,7 +39,7 @@ def drawPlot(xs, ys, t, xl, yl):
     
     if xl == 3:
         for i in range(0, 1440, 180):
-            plt.annotate(util.secondsToTime(xs[i]).show(), (xs[i], ys[i]),xytext=(xs[i], ys[i]-(uy-ly)/10), arrowprops={"headwidth": 1, "width":1})
+            plt.annotate(util.secondsToTime(xs[i]).__str__(), (xs[i], ys[i]),xytext=(xs[i], ys[i]-(uy-ly)/10), arrowprops={"headwidth": 1, "width":1})
     elif xl == 4:
         for (d,t) in dateAnno:
             plt.annotate(t, (d, ys[d-1]),xytext=(d, ys[d-1]-(uy-ly)/20), arrowprops={"headwidth": 1, "width":0.5})
@@ -56,7 +57,7 @@ def drawPlot(xs, ys, t, xl, yl):
             plt.axhline(d)
             plt.annotate(t,(ux,d))
 
-def riseSetPlot(xs, tr, ts, xl,t):
+def riseSetPlot(xs, tr, ts, xl, t):
     fig, ax1 = plt.subplots()
     ax1.set_title(t)
     ax1.set_xlabel(xl)
@@ -90,26 +91,29 @@ def riseSetPlot(xs, tr, ts, xl,t):
         ax2.annotate("Sunset",(xs[10],ts[10]))
     for t in range(-7200,150000,timeStep):
         if t >= ly - timeStep/3 and t <= uy+timeStep/3:
-            ax1.annotate(util.secondsToTime(t).show(), (-0.5,t))
+            ax1.annotate(util.secondsToTime(t).__str__(), (-0.5,t))
             ax1.axhline(t,0,0.6)
     for t in range(-7200,150000,timeStep):
         if t >= ly2 - timeStep/3 and t <= uy2+timeStep/3:
-            ax2.annotate(util.secondsToTime(t).show(), (xs[-10],t))
+            ax2.annotate(util.secondsToTime(t).__str__(), (xs[-10],t))
             ax2.axhline(t,0.4,1)
-    
 
 class Plot:
-    def __init__(self, queries, fields, ab):
+    def __init__(self, queries, fields, conditions):
         self.queries = queries
         self.miss = None
         self.over = None
         self.fields = fields
+        self.conditions = conditions
     
     def loadMap(self, args, iv):
         self.args = args
+        self.desc = ""
+        for k,v in self.conditions.items():
+            self.desc += ","+k+": "+v
         self.iv = iv
 
-    def draw(self, calc):
+    def draw(self):
         lat = util.toRad(self.args[0])
         noon = model.noonSecs(self.args[2], self.args[1])
         dates = np.array([d for d in range(1, 366, 1)])
@@ -125,22 +129,24 @@ class Plot:
                     for i in range(len(locTime)):
                         ang, ht = sp.sungeom(sinlat0, lat, [noon, locTime[i]])
                         heights[i] = util.toDeg(ht) 
-                        directions[i] = util.direcctionHalf(ang) 
-                    drawPlot(locTime, heights, "Sun height over 24 hours "+"on "+self.args[3].show(),3,1)
-                    pn = plotFiles[0]+str(calc.plotNum[0])+".png"
-                    plt.savefig(pn)
+                        directions[i] = util.direcctionHalf(ang)
+                    t = "Sun height over 24 hours"
+                    drawPlot(locTime, heights, 3,1, t)
+                    pn = record.checkPlotNum()
+                    record.registerPlot(pn, plotTypes[0], t+self.desc)
+                    plt.savefig(plotPref+pn+".png")
                     plt.clf()
                     plots.append(pn)
-                    calc.plotNum[0] += 1
                 else:
                     for i in range(len(locTime)):
                         directions[i] = util.direcctionHalf(sp.sungeom(sinlat0, lat, [noon, locTime[i]])[0]) 
-                drawPlot(locTime, directions, "Sun direction over 24 hours "+"on "+self.args[3].show(),3,2)
-                pn = plotFiles[2]+str(calc.plotNum[2])+".png"
-                plt.savefig(pn)
+                t = "Sun direction over 24 hours"
+                drawPlot(locTime, directions,3,2,t)
+                pn = record.checkPlotNum()
+                record.registerPlot(pn, plotTypes[2], t+self.desc)
+                plt.savefig(plotPref+pn+".png")
                 plt.clf()
                 plots.append(pn)
-                calc.plotNum[2] += 1
             if self.iv == 4:
                 noonshift = [noon, self.args[3].toSecs()]
                 directions = np.zeros(len(dates))
@@ -151,47 +157,50 @@ class Plot:
                         ang, ht = sp.sungeom(sinlat0, lat, noonshift)
                         directions[d-1] = util.toDeg(ang) 
                         heights[d-1] = util.toDeg(ht)
-                    drawPlot(dates,heights,"Sun height at "+self.args[3].show()+" every day of the year",4,1)
-                    pn = plotFiles[1]+str(calc.plotNum[1])+".png"
-                    plt.savefig(pn)
+                    t = "Sun height on each day of the year"
+                    drawPlot(dates,heights,4,1,t)
+                    pn = record.checkPlotNum()
+                    record.registerPlot(pn, plotTypes[1], t+self.desc)
+                    plt.savefig(plotPref+pn+".png")
                     plt.clf()
                     plots.append(pn)
-                    calc.plotNum[1] += 1
                 else:
                     for d in range(1, 366, 1):
                         sinlat0 = model.sunDirectLatSin(util.daysToDate(d)) 
                         directions[d-1] = util.toDeg(sp.sungeom(sinlat0, lat, noonshift)[0]) 
-                drawPlot(directions,dates,"Sun direction at "+self.args[3].show()+" every day of the year",2,4)
-                pn = plotFiles[3]+str(calc.plotNum[3])+".png"
-                plt.savefig(pn)
+                t = "Sun direction on each day of the year"
+                drawPlot(directions,dates,2,4,t)
+                pn = record.checkPlotNum()
+                record.registerPlot(pn, plotTypes[3], t+self.desc)
+                plt.savefig(plotPref+pn+".png")
                 plt.clf()
                 plots.append(pn)
-                calc.plotNum[3] += 1
         elif self.queries == [1]:
             if self.iv == 3:
                 sinlat0 = model.sunDirectLatSin(self.args[3])
                 heights =  np.zeros(len(locTime))
                 for i in range(len(locTime)):
                     heights[i] = util.toDeg(sp.sunht(sinlat0, lat, [noon, locTime[i]])[0]) 
-                drawPlot(locTime, heights, "Sun height over 24 hours "+"on "+self.args[3].show(),3,1)
-                pn = plotFiles[0]+str(calc.plotNum[0])+".png"
-                plt.savefig(pn)
+                t = "Sun height over 24 hours"
+                drawPlot(locTime, heights,3,1,t)
+                pn = record.checkPlotNum()
+                record.registerPlot(pn, plotTypes[0], t+self.desc)
+                plt.savefig(plotPref+pn+".png")
                 plt.clf()
                 plots.append(pn)
-                calc.plotNum[0] += 1
             elif self.iv == 4:
                 noonshift = [noon, self.args[3].toSecs()]
-                
                 heights = np.zeros(len(dates))
                 for d in dates:
                     sinlat0 = model.sunDirectLatSin(util.daysToDate(d)) 
                     heights[d-1] = util.toDeg(sp.sunht(sinlat0, lat, noonshift)[0])
-                drawPlot(dates,heights,"Sun height at "+self.args[3].show()+" every day of the year",4,1)
-                pn = plotFiles[1]+str(calc.plotNum[1])+".png"
-                plt.savefig(pn)
+                t = "Sun on each day of the year"
+                drawPlot(dates,heights,4,1,t)
+                pn = record.checkPlotNum()
+                record.registerPlot(pn, plotTypes[1], t+self.desc)
+                plt.savefig(plotPref+pn+".png")
                 plt.clf()
                 plots.append(pn)
-                calc.plotNum[1] += 1
         elif 7 in self.queries or 8 in self.queries:
             if self.iv == 4:
                 match len(self.args):
@@ -202,12 +211,13 @@ class Plot:
                             hdl = st.dayLength(util.daysToDate(d), lat)/2
                             rises[d-1] = noon-hdl
                             sets[d-1] = noon + hdl
-                        riseSetPlot(dates,rises,sets,labels[4],"Sunrise and sunset times every day of the year")
-                        pn = plotFiles[4]+str(calc.plotNum[4])+".png"
-                        plt.savefig(pn)
+                        t = "Sunrise and sunset times every day of the year"
+                        riseSetPlot(dates,rises,sets,labels[4], t)
+                        pn = record.checkPlotNum()
+                        record.registerPlot(pn, plotTypes[4], t+self.desc)
+                        plt.savefig(plotPref+pn+".png")
                         plt.clf()
                         plots.append(pn)
-                        calc.plotNum[4] += 1
                     case 4:
                         ang = model.horizonAngle(self.args[3])
             elif self.iv == 9:
@@ -223,32 +233,40 @@ class Plot:
                         ts = 2*noon-tr
                         rises[j][i] = tr
                         sets[j][i] = ts
-                    riseSetPlot(a,rises[j],sets[j],"Altitude (km)","Sunrise and sunset times for different altitudes on "+self.args[3].show())
+                    t = "Sunrise and sunset times at different altitudes"
+                    riseSetPlot(a,rises[j],sets[j],"Altitude (km)", t)
                     num = 5+j
-                    pn = plotFiles[num]+str(calc.plotNum[num])+".png"
-                    plt.savefig(pn)
+                    pn = record.checkPlotNum()
+                    record.registerPlot(pn, plotTypes[num], t+self.desc)
+                    plt.savefig(plotPref+pn+".png")
                     plt.clf()
                     plots.append(pn)
-                    calc.plotNum[num] += 1
         return plots
 
-    def show(self):
-        print("plot")
+    def validInfo(self):
+        if not self.queries:
+            return 1, ""
+        
+        valid = 0
         res = "Plotting for: "
         for a in self.queries:
-            res += self.fields[a]
+            res += self.fields[a] + ", "
+        res += "\n"
         if self.miss:
-            res += str(self.miss)
+            valid = 2
+            res += "**Missing: " + str(self.miss)
+            # for miss in self.miss:
+            #     res += ", "+self.fields[miss]
         elif self.over:
-            res += " oversufficient: "+self.fields[self.over]
-        else:
-            res += " -versus- "+self.fields[self.iv] 
-        return res
+            valid = 2
+            res += "**Oversufficient: "+self.fields[self.over]
+
+        return valid, res
     
 # p = Plot([7,8], ["Time zone--GMT", "Sun height angle", "Sun direction angle", "Local time","Date", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation", "","Solar noon"])
 # # p.loadMap([51, -0.1, 1, Date(7,4)], 3)
 # # p.loadMap([35, 112, 8, Date(7,4)], 9)
 # p.loadMap([35, 112, 8], 4)
-# print(p.show())
+# print(p.__str__())
 # print(p.draw())
 # print(plotFiles)

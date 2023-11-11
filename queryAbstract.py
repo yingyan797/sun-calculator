@@ -4,9 +4,14 @@ import sunTime as st
 import sunPosition as sp
 from plot import Plot
 
-fields = ["Time zone--GMT", "Sun height angle", "Sun direction angle", "Local time", 
+fields = ["Time zone GMT", "Sun height angle", "Sun direction angle", "Local time", 
           "Date", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation", "","Solar noon"]
 
+qs = ["what is the (theoretical) time zone?", "what is the height angle of the sun (relative to horizon)?", 
+                "what is the direction of the sun (angle clockwise from North)?", "what time of the day is it when", 
+                "which date is it when", "what is the longitude of a location where", "what is the latitude of a location where", 
+                "what time does sunrise occur?", "what time does sunset occur?", "what altitude of observation (in meters) is it where",
+                "", "what time is the solar noon?"]
 sunriseset = [(st.sunTimeAltitude, [6,5,0,4,9]), (st.sunTimes, [6,5,0,4])]
 
 answerMap = {
@@ -31,10 +36,12 @@ class Abstract:
         self.angles = []
         self.details = [None for i in range(12)]
         self.interpret = ""
-        self.conditions = []
+        self.conditions = {}
         self.response = []
         self.place = None
         self.ivs = []
+        self.plotNums = []
+        self.plotInfo = []
 
     def addDate(self, month, day):
         d = Date(int(month), int(day))
@@ -84,15 +91,10 @@ class Abstract:
     def formQuestion(self):
         self.interpret = ""  
         if self.queries == []:
-            self.interpret += "**Sorry, unable to detect what to calculate/plot. "
+            self.interpret += "**Sorry, unable to detect what values to calculate or plot. "
         else:    
             if self.place:
                 self.interpret = "at "+self.place+", "
-            qs = ["what is the (theoretical) time zone?", "what is the height angle of the sun (relative to horizon)?", 
-                "what is the direction of the sun (angle clockwise from North)?", "what time of the day is it when", 
-                "which date is it when", "what is the longitude of a location where", "what is the latitude of a location where", 
-                "what time does sunrise occur?", "what time does sunset occur?", "what altitude of observation (in meters) is it where",
-                "", "what time is the solar noon?"]
             for qi in self.queries:
                 self.interpret += qs[qi] + " "
             self.interpret = self.interpret[0].upper() + self.interpret[1:]
@@ -108,26 +110,26 @@ class Abstract:
         self.interpret += " --Given conditions:"
         lat, lon = self.details[6], self.details[5]
         if lat != None and lon != None:
-            self.conditions.append("Location: "+util.showLat(lat)+", "+util.showLon(lon))
+            self.conditions["Location"] = util.showLat(lat)+" "+util.showLon(lon)
         else:
             if lat != None:
-                self.conditions.append(fields[6]+": "+util.showLat(lat))
+                self.conditions[fields[6]] = util.showLat(lat)
             elif lon != None:
-                self.conditions.append(fields[5]+": "+util.showLon(lon))
+                self.conditions[fields[5]] = util.showLon(lon)
         
         for i in [4, 3]:
             if self.details[i]:
-                self.conditions.append(fields[i]+": "+self.details[i].show())
+                self.conditions[fields[i]] = self.details[i].__str__()
         if self.details[0] is not None:
             gmt = self.details[0]
-            c = "Time zone: GMT "
+            c = ""
             if gmt > 0:
-                c += '+'+str(gmt)
+                c = '+'+str(gmt)
             else:
-                c += str(gmt)
-            self.conditions.append(c)
+                c = str(gmt)
+            self.conditions[fields[0]] = c
         if self.details[9]:
-            self.conditions.append(fields[9]+": "+str(self.details[9])+self.details[10])
+            self.conditions[fields[9]] = str(self.details[9])+self.details[10]
 
     def formPlot(self):
         def checkConds(pmap):
@@ -143,7 +145,7 @@ class Abstract:
                     return (ms, iv), None
             return None, missing
 
-        plots = [Plot([], fields, self) for i in range(2)]
+        plots = [Plot([], fields, self.conditions) for i in range(2)]
         ps = [1,2,7,8]
         pflag = [False, False]
         for q in self.queries:
@@ -162,13 +164,20 @@ class Abstract:
                         plots[i].over = pmap[1]
                     else:
                         plots[i].miss = miss
-        plotNames = []
+        self.plotInfo = []
+        self.plotNums = []
         for plot in plots:
-            plotNames += plot.draw()
-        return plotNames
+            valid, info = plot.validInfo()
+            if valid == 0:
+                self.plotNums += plot.draw()
+            elif valid == 2:
+                self.plotInfo.append(info)
 
     def formResponse(self):
         self.response = []
+        if not self.conditions:
+            self.response.append("**Missing conditions")
+            return False
         if self.details[10] == "km":
             self.details[10] = "m"
             self.details[9] *= 1000
@@ -237,12 +246,14 @@ class Abstract:
             res.append(res78[i-7])
             missing.append(miss78)
         
+        valid = False
         for i in range(len(qtemp)):
             info = ""
             if res[i] is not None:
                 info = fields[qtemp[i]]+": "+str(res[i])
+                valid = True
             if missing[i] is not None:
-                info = fields[qtemp[i]]+": **Missing the following information: \n  <Case 1>"
+                info = "Calculating "+fields[qtemp[i]]+": **Missing the following information: \n  <Case 1>"
                 c = 1
                 for m in missing[i][0]:
                     info += ", "+fields[m]
@@ -251,7 +262,8 @@ class Abstract:
                     info += "\n  <Case "+str(c)+'>'
                     for m in ms:
                         info += ", "+fields[m]
-            self.response.append(info+'\n')
+            self.response.append(info)
+            return valid
         # for qt in qtemp:
         #     self.response.append(fields[qt]+res[qt])
 

@@ -21,7 +21,7 @@ def sunTimes(args):
     # lat, lon, gmt, date
     hdl = dayLength(args[3], toRad(args[0]))/2
     noon = noonSecs(args[2], args[1])
-    return secondsToTime(noon-hdl).show(), secondsToTime(noon+hdl).show()
+    return secondsToTime(noon-hdl).__str__(), secondsToTime(noon+hdl).__str__()
 
 # Display calculation result
 def calcSun(lat, lon, gmt, date):
@@ -37,9 +37,9 @@ def calcSun(lat, lon, gmt, date):
     if lon < 0:
         ew = "W"
     print("Location: "+str(abs(lat))+ns+", "+str(abs(lon))+ew+"\n"
-          +"Date: "+date.show()+"\n"
-          +"Sunrise: "+sr.show()+"\n"
-          +"Sunset:  "+ss.show())
+          +"Date: "+date.__str__()+"\n"
+          +"Sunrise: "+sr.__str__()+"\n"
+          +"Sunset:  "+ss.__str__())
 
 def sunTimeAltitude(args):
     # lat, lon, gmt, date, alt

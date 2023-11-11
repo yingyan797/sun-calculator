@@ -23,12 +23,14 @@ kms = ["km", "kilometer", "kilometers", "kilometre", "kilometres"]
 class Calculator:
     def __init__(self, seps=util.seps):
         self.seps = seps
+        self.tasks = ""
         self.taskDesc = ""
         self.abi = None
         self.abstracts = []
     
     def parseTask(self, tasks):
         ci = 0
+        self.tasks = tasks
         self.abstracts = []
         self.abi = None
         while True:
