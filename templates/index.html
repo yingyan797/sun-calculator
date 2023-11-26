@@ -68,13 +68,13 @@
                 ; Altitude<input type="checkbox" name="PAlt"><br><br>
                 
                 <b>--Given conditions (fill in those needed)--</b><br>
-                <label for="Longitude">Longitude: </label><input type="number" step="0.01" min="-180" max="180" name="Longitude"></label> 
-                    <label for="East">East</label><input type="radio" name="EW" value="East"><label for="West">;West</label><input type="radio" name="EW" value="West">
-                , Latitude: <input type="number" step="0.01" min="-90" max="90" name="Latitude"></label>
-                    <label for="North">North</label><input type="radio" name="NS" value="North"><label for="South">;South</label><input type="radio" name="NS" value="South"><br>
-                <label for="Altitude">Altitude: </label><input type="number" step="0.01" min="0" name="Altitude">
-                m<input type="radio" name="unit" value="m">; km<input type="radio" name="unit" value="km">; ft<input type="radio" name="unit" value="ft"><br>
-                Date: Month <input type="number" min="1" max="12" name="Month">
+                Latitude: <input type="number" step="0.01" min="-90" max="90" name="Latitude"></label>
+                    <label for="North">North</label><input type="radio" name="NS" value="North"><label for="South">;South</label><input type="radio" name="NS" value="South">
+                , Longitude: <input type="number" step="0.01" min="-180" max="180" name="Longitude"></label> 
+                    <label for="East">East</label><input type="radio" name="EW" value="East"><label for="West">;West</label><input type="radio" name="EW" value="West"><br>
+                Altitude: <input type="number" step="0.01" min="0" name="Altitude">
+                m<input type="radio" name="unit" value="m">; km<input type="radio" name="unit" value="km">; ft<input type="radio" name="unit" value="ft">
+                , Date: Month <input type="number" min="1" max="12" name="Month">
                 / Day <input type="number" min="1" max="31" name="Day"><br>
                 Local Time <input type="number" min="0" max="24" name="Hour">
                 : <input type="number" min="0" max="59" name="Minute">
@@ -86,7 +86,7 @@
             </form>
 
         </div>
-        <div class="column" style="background-color:aquamarine;">
+        <div class="column" style="background-color:lightblue;">
             <form action="/history" method="post">
             <h2>Summarization and Results
                 <input type="submit" name="mode" value="Show plot history">

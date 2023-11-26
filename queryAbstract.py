@@ -7,11 +7,12 @@ from plot import Plot
 fields = ["Time zone GMT", "Sun height angle", "Sun direction angle", "Local time", 
           "Date", "Longitude", "Latitude", "Sunrise time", "Sunset time", "Altitude of observation", "","Solar noon"]
 
-qs = ["what is the (theoretical) time zone?", "what is the height angle of the sun (relative to horizon)?", 
-                "what is the direction of the sun (angle clockwise from North)?", "what time of the day is it when", 
+qs = ["what is the (theoretical) time zone?", "what is the sun's height angle?", 
+                "what is the sun's direction (angle from North)?", "what time of the day is it when", 
                 "which date is it when", "what is the longitude of a location where", "what is the latitude of a location where", 
                 "what time does sunrise occur?", "what time does sunset occur?", "what altitude of observation (in meters) is it where",
                 "", "what time is the solar noon?"]
+placeLim = 10
 sunriseset = [(st.sunTimeAltitude, [6,5,0,4,9]), (st.sunTimes, [6,5,0,4])]
 
 answerMap = {
@@ -94,7 +95,10 @@ class Abstract:
             self.interpret += "**Sorry, unable to detect what values to calculate or plot. "
         else:    
             if self.place:
-                self.interpret = "at "+self.place+", "
+                place = self.place
+                if len(place) > placeLim:
+                    place = self.place[:placeLim]+"."
+                self.interpret = "at "+place+", "
             for qi in self.queries:
                 self.interpret += qs[qi] + " "
             self.interpret = self.interpret[0].upper() + self.interpret[1:]
@@ -102,7 +106,7 @@ class Abstract:
             if self.details[1]:
                 self.interpret += " the sun is at "+str(self.details[1])+" degree above horizon?"
             if self.details[2]:
-                self.interpret += " the sun's direction is "+str(self.details[2])+" degree clockwise from North?"
+                self.interpret += " the sun's direction is "+str(self.details[2])+" degree from North?"
         if self.ivs:
             self.interpret += "Plotting over "+fields[self.ivs[0]]
         for iv in self.ivs[1:]:
@@ -262,8 +266,8 @@ class Abstract:
                     info += "\n  <Case "+str(c)+'>'
                     for m in ms:
                         info += ", "+fields[m]
-            self.response.append(info)
-            return valid
+            self.response.append(info+"\n")
+        return valid
         # for qt in qtemp:
         #     self.response.append(fields[qt]+res[qt])
 

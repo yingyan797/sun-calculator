@@ -89,7 +89,6 @@ def approachDate(lat, noon, summer, time, calc, std):
     
     return minDays
 
-
 def approachLat(lat0, noon, time, calc, std):
     latl = -np.pi/2
     lath = np.pi/2
@@ -98,4 +97,16 @@ def approachLat(lat0, noon, time, calc, std):
     while lat <= lath:
         break
     return lat
+
+def sphereDistance(lats, lons):
+    for i in range(2):
+        lats[i] = util.toRad(lats[i])
+        lons[i] = util.toRad(lons[i])
+    rise2 = pow(np.sin(lats[0])-np.sin(lats[1]), 2)
+    ra = np.cos(lats[0])
+    rb = np.cos(lats[1])
+    run2 = pow(ra, 2) + pow(rb, 2) - 2*ra*rb*np.cos(lons[0] - lons[1])
+    ang = 2*np.arcsin(util.arcCap(np.sqrt(rise2+run2)/2))
+
+    return earthRadius/1000*ang
 

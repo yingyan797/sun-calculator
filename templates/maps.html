@@ -1,54 +1,81 @@
 <head>
-    <title>Location</title>
+    <title>Place finder</title>
 </head>
 <style>
     table, th, td {
       border:1px solid black;
     }
+    /* Create two equal columns that floats next to each other */
+    .column {
+      float: left;
+      width: 48%;
+      padding: 10px;
+      /* height: 300px; Should be removed. Only for demonstration */
+    }
+    
+    /* Clear floats after the columns */
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
 </style>
-<body style="background-image: url('../static/Image/yearth.png');">
-    <h1 style="background-color: aqua;"><a href="/">Sun Calculator</a> | Geographical information finder </h1>
-   
-    <form style="background-color: lightblue; text-indent:0%; width: max-content; padding: 10px;" action="/maps" method="post">
-        <h2>Search a place (location, time zone...)</h2>
-        <textarea name="location" cols="50" rows="1">{{location}}</textarea>
-        <button type="submit">Search</button><br>
-        {% if location %}
-        <a href="https://google.com/maps/place/{{location}}" target="_blank"><h4>See {{location.upper()}} on maps</h4></a>
-        <a href="https://google.com/search?q={{location}}+time+zone" target="_blank"><h4>Time zone of {{location.upper()}}</h4></a><br>
-        {% endif %}
-    </form>
-    <div style="background-color:lightgoldenrodyellow; text-indent:0%; width: max-content;  padding: 10px;">
-    <form action="/maps" method="post">
-        <h2>Register geographical information</h2>Place name: <b><input type="text" name="location" value="{{location}}"></b><br>
-        Longitude: <input type="number" step="0.01" min="-180" max="180" name="Longitude">
-        East<input type="radio" name="EW" value="East">; West<input type="radio" name="EW" value="West">
-        , Latitude: <input type="number" step="0.01" min="-90" max="90" name="Latitude">
-        North<input type="radio" name="NS" value="North">; South<input type="radio" name="NS" value="South"><br>
-        Time zone--GMT: <input type="number" min="-12" max="12" name="GMT"><br>
-        <button type="submit">Register place</button>
-    </form>
-    <form action="/maps" method="post">
-        <h2>Registered Places</h2>
-        <table>
-            <tr>
-                <th>No.</th><th>Place</th><th>Coordinate</th><th>Time Zone</th><th>Delete</th><th>Update</th>
-            </tr>
-            {% if table %}
-            {% for row in table %}
-            <tr>
-                <td>{{row[0]}}</td>
-                <td><input type="text" name="place{{row[0]}}" value="{{row[1]}}"></td>
-                <td><input type="text" name="coord{{row[0]}}" value="{{row[2]}}"></td>
-                <td><input type="text" name="gmt{{row[0]}}" value="GMT {{row[3]}}"></td>
-                <td><input type="checkbox" name="delete{{row[0]}}"></td>
-                <td><input type="checkbox" name="update{{row[0]}}"></td>
-            </tr>
-            {% endfor %}
+<body>
+    <h1 style="background-color: aquamarine;"><a href="/">Sun Calculator</a> | Geographical information finder </h1>
+    <div class="row">
+    <div class="column">
+        <form style="background-color: lightblue; text-indent:0%; padding: 10px;" action="/maps" method="post">
+            <h2>Search a place (location, time zone...)</h2>
+            <textarea name="location" cols="50" rows="1">{{locInfo[0]}}</textarea>
+            <button type="submit">Search</button><br>
+            {% if locInfo[0] %}
+            <a href="https://google.com/maps/place/{{locInfo[1]}}" target="_blank">See {{locInfo[0]}} on maps</a>
+            <input type="submit" name="locmap" value="Check lat. & lon.">
+            <input type="submit" name="loctz" value="Check time zone">
             {% endif %}
-        </table><br>
-        <button type="submit">Confirm changes</button>
-    </form></div>
-    <!-- <img src="{{url_for('static', filename='Image/yearth.png')}}" alt="sun" height="70%"> -->
+        </form>
+        <div style="background-color:lightgoldenrodyellow; text-indent:0%; padding: 10px;">
+        <form action="/maps" method="post">
+            <h2>Register geographical information</h2>Place name: <b><input type="text" name="location" value="{{locInfo[0]}}"></b>
+            Latitude: <input type="number" step="0.01" min="-90" max="90" name="Latitude">
+            North<input type="radio" name="NS" value="North">; South<input type="radio" name="NS" value="South"><br>
+            Longitude: <input type="number" step="0.01" min="-180" max="180" name="Longitude">
+            East<input type="radio" name="EW" value="East">; West<input type="radio" name="EW" value="West">
+            Time zone--GMT: <input type="number" min="-12" max="12" name="GMT">
+            <button type="submit">Register place</button>
+        </form>
+        <form action="/maps" method="post">
+            <h2>Calculate distance between places</h2>
+            - Select 2 places from the table, or enter 2 coordinates below<br>
+            Coordinate 1: <input type="text" name="dist1">; Coordinate 2: <input type="text" name="dist2">
+            <input type="submit" name="dist" value="Calculate"><br>
+            <b>Distance: {{dist}} km</b><br>
+            <h2>Registered Places <input type="submit" name="delete" value="Delete entries">
+                <input type="submit" name="update" value="Update entries"></h2>
+            <table>
+                <tr>
+                    <th>No.</th><th>Place</th><th>Coordinate</th><th>Time Zone</th><th>Select</th>
+                </tr>
+                {% if table %}
+                {% for row in table %}
+                <tr>
+                    <td>{{row[0]}}</td>
+                    <td><input type="text" name="place{{row[0]}}" value="{{row[1]}}"></td>
+                    <td><input type="text" name="coord{{row[0]}}" value="{{row[2]}}"></td>
+                    <td><input type="text" name="gmt{{row[0]}}" value="GMT {{row[3]}}"></td>
+                    <td><input type="checkbox" name="select{{row[0]}}"></td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+            </table>
+        </form></div>
+    </div>
+    <div class="column">
+        {% if locInfo[2] %}
+        <iframe height="85%" width="95%" src="https://bing.com/search?q={{locInfo[1]+locInfo[2]}}"></iframe>
+        {% endif %}
+    </div>
+    
+    </div>
 </body>
 

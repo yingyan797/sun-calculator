@@ -1,4 +1,4 @@
-from util import validLat, validLon, seps, showLat, showLon
+from util import validLat, validLon, seps, showLat, showLon, parseRecord
 
 placeFile = "static/db/places.csv"
 plotFile = "static/db/plots.csv"
@@ -69,22 +69,7 @@ def registerPlace(place, lon, lat, ew, ns, gmt):
     return readPlaces(False)
 
 def updatePlace(place, ln, coordi, gmti):
-    from queryProcess import Calculator
-    sc = Calculator()
-    sc.taskDesc = coordi
-    sc.readProgress = 0
-    sc.notMatchToken = ""
-    lat, lon = sc.parseLocation()
-    if not validLat(lat):
-        lat = ""
-    if not validLon(lon):
-        lon = ""
-    sc.taskDesc = gmti
-    sc.readProgress = 0
-    sc.notMatchToken = ""
-    gmt = sc.parseGMT()
-    if gmt > 12 or gmt < -12:
-        gmt = ""
+    lat, lon, gmt = parseRecord([coordi, gmti])
     info = place+','+str(lat)+','+str(lon)+','+str(gmt)
     if info != ",,,":
         changeRecord(place, ln, info+'\n')
@@ -145,10 +130,12 @@ def registerCalc(interpret, conditions, res):
     f = open(calcFile, "r")
     lines = f.readlines()
     f.close()
-    f = open(calcFile, "w")
     if len(lines) >= 3*calcLim:
+        f = open(calcFile, "w")
         lines = lines[3:]
         f.writelines(lines)
+        f.close()
+    f = open(calcFile, "a")
     f.write(interpret+"\n")
     for k,v in conditions.items():
         f.write(k+": "+v+", ")

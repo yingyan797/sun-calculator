@@ -1,3 +1,6 @@
-At London, what time does sunrise occur?  --Given conditions:
+At London, what time does sunrise occur? what time does sunset occur? 
 Location: 51.5N 0.1W, Date: July 4, Time zone GMT: +1, 
-Sunrise time: 04:52:41,
+Sunrise time: 04:52:41; Sunset time: 21:08:06; 
+What is the sun's direction (angle from North)? 
+Location: 35.0N 120.0E, Date: September 15, Local time: 17:25, Time zone GMT: +8, 
+Sun direction angle: 266.4520427806618, West; 

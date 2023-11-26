@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request
 import queryProcess as sc
-import record
-import os
-import glob
+import record, util, model
+import os, glob
 
 app = Flask(__name__)
 calc = sc.Calculator()
@@ -120,8 +119,8 @@ def index():
             if ab.formResponse():
                 res = ""
                 for r in ab.response:
-                    res += r+","
-                record.registerCalc(ab.interpret, ab.conditions, res)
+                    res += r[:-1]+"; "
+                record.registerCalc(ab.interpret[:-20], ab.conditions, res)
         elif request.form.get("Plot"+str(ab.num)):
             ab.formPlot()
 
@@ -183,31 +182,54 @@ def maps():
         gmt = request.form.get('GMT')
         table = record.registerPlace(loc, lon, lat, ew, ns, gmt)
         calc.table = record.readPlaces(True)
-        return render_template('maps.html', location=loc, table=table)
+        ls = loc.split(" ")
+        query = ls[0]
+        location = ls[0][0].upper()+ls[0][1:]
+        for l in ls[1:]:
+            query += "+"+l
+            location += " "+l[0].upper()+l[1:]
+        info = ""
+        if request.form.get("locmap"):
+            info = "+latitude+longitude"
+        elif request.form.get("loctz"):
+            info = "+time+zone"
+        return render_template('maps.html', locInfo=(location, query, info), table=table)
     
     pn = 1
     change = False
+    sels = []
     while True:
         p = request.form.get("place"+str(pn))
+        c = request.form.get("coord"+str(pn))
         if p == None:
             break
-        d = request.form.get("delete"+str(pn))
-        if d:
-            change = True
-            record.deletePlace(p)
-        u = request.form.get("update"+str(pn))
-        if u:
-            change = True
-            c = request.form.get("coord"+str(pn))
-            g = request.form.get("gmt"+str(pn))
-            record.updatePlace(p, pn-1, c, g)
+
+        if request.form.get("select"+str(pn)):
+            sels.append(c)       
+            if request.form.get("delete"):
+                change = True
+                record.deletePlace(p)
+            elif request.form.get("update"):
+                change = True
+                g = request.form.get("gmt"+str(pn))
+                record.updatePlace(p, pn-1, c, g)
         pn += 1
     if change:
         calc.table = record.readPlaces(True)
-
-    return render_template('maps.html', table=record.readPlaces(False))
-
     
+    dist = ""
+    if request.form.get("dist"):
+        lats,lons = [None, None],[None, None]
+        if len(sels) != 2:
+            sels = [request.form.get("dist1"), request.form.get("dist2")]
+        if sels[0] and sels[1]:
+            for i in range(2):
+                lats[i], lons[i], nugmt = util.parseRecord([sels[i]])
+            if "" not in lats and "" not in lons:
+                dist = str(model.sphereDistance(lats,lons))
+
+    return render_template('maps.html', locInfo=("","",""), table=record.readPlaces(False), dist=dist)
+
 
 @app.route('/information', methods=['GET', 'POST']) # show the main page
 def infomation():
@@ -241,6 +263,7 @@ def history():
             left = False
         else:
             hpair[1].append(info)
+            left = True
 
     return render_template('history.html', mode=mode, hpair=hpair, num=len(hs))
 

@@ -140,3 +140,21 @@ def direcctionHalf(rad):
     if rad <= np.pi:
         return toDeg(rad)
     return toDeg(2*np.pi - rad)
+
+def parseRecord(info):
+    from queryProcess import Calculator
+    sc = Calculator()
+    sc.taskDesc = info.pop(0)
+    sc.readProgress = 0
+    sc.notMatchToken = ""
+    lat, lon = sc.parseLocation()
+    gmt = ""
+    if not validLat(lat):
+        lat = ""
+    if not validLon(lon):
+        lon = ""
+    if info:
+        gmt = sc.parseGMT()
+        if gmt > 12 or gmt < -12:
+            gmt = ""
+    return lat,lon,gmt
