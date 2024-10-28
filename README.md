@@ -1,5 +1,8 @@
 ﻿# Y-Earth: Interactive sun calculator 
- 
+  
+## For easier usage, please try out the online Frontend version [Y-Astronomy]
+https://yingyan797.github.io/no-backend/y-astronomy (More STEM applications are also available on this site)
+
 This web application is designed to Calculate and Visualize the Sun's position and time given user inquiries in natural language or questionnaires. OpenAI chatbot is Not used; instead, a parser is written for understanding user inquiries. Available calculations include sunrise, sunset, solar noon, sun height angle, sun's direction, local time, date, etc. The program is able to produce solutions in either numeric values or plots, depending on what user asks or implies. If any condition/detail essential for calculating/plotting a particular variable is missing in user queries, user will be prompted to add the corresponding details.
 
 In addition, user is welcome to search for geographical information of places and register them in the record. As a result, user can directly enter registered place names instead of writing all details out, as details will be included automatically.
